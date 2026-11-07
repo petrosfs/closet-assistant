@@ -28,6 +28,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:10px;padding:0 16px}
 .tile{position:relative;aspect-ratio:3/4;border-radius:var(--r);overflow:hidden;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:38px;width:100%}
 .tile img{width:100%;height:100%;object-fit:cover;display:block}
+.tile img.cut{object-fit:contain;padding:6px;box-sizing:border-box}
 .dot{position:absolute;left:6px;bottom:6px;width:20px;height:20px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.3)}
 button.tile{padding:0}
 nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:6}
@@ -148,6 +149,10 @@ photoN:(k,n)=>`Φωτογραφία ${k} από ${n}`,palName:'Προχωρημ�
 mlName:'Αυτόματη αναγνώριση είδους',on:'Ενεργή',off:'Ανενεργή',
 mlNote:'Τρέχει στη συσκευή σου και είναι δωρεάν. Την πρώτη φορά κατεβάζει ένα μοντέλο (περίπου 155 MB) και μετά το κρατά. Οι φωτογραφίες δεν ανεβαίνουν πουθενά. Μπορεί να κάνει λάθη, οπότε ρωτά πάντα για επιβεβαίωση.',
 mlConfirm:'Θα κατεβάσει περίπου 155 MB (μία φορά). Καλύτερα με Wi-Fi. Συνέχεια;',
+bgName:'✂️ Αφαίρεση φόντου',bgNote:'Κόβει το φόντο από τις φωτογραφίες, στη συσκευή σου (τίποτα δεν ανεβαίνει). Την πρώτη φορά κατεβάζει ένα μοντέλο ~45 MB. Σε κινητό μπορεί να θέλει μερικά δευτερόλεπτα ανά φωτογραφία.',
+bgConfirm:'Η αφαίρεση φόντου χρειάζεται μία λήψη ~45 MB (μόνο την πρώτη φορά, καλύτερα με Wi-Fi). Να συνεχίσω;',
+bgDo:'✂️ Αφαίρεση φόντου',bgUndo:'↩️ Επαναφορά αρχικής φωτογραφίας',bgWorking:'✂️ Αφαιρώ το φόντο…',
+bgFail:'Δεν μπόρεσα να ξεχωρίσω το ρούχο από το φόντο. Κράτησα την αρχική φωτογραφία.',bgLoadErr:'Η λήψη του μοντέλου απέτυχε. Έλεγξε τη σύνδεση και ξαναδοκίμασε.',
 mlWait:'Αναγνώριση είδους…',mlDownloading:p=>`Κατεβαίνει το μοντέλο (${p}%). Γίνεται μόνο την πρώτη φορά.`,
 mlGuess:'Ανίχνευσα:',mlMaybe:'Ή μήπως:',
 mlFail:'Η αυτόματη αναγνώριση δεν δούλεψε (χρειάζεται σύνδεση την πρώτη φορά). Διάλεξε το είδος χειροκίνητα.',
@@ -220,6 +225,10 @@ photoN:(k,n)=>`Photo ${k} of ${n}`,palName:'Advanced palette',palMore:'More shad
 mlName:'Automatic item recognition',on:'On',off:'Off',
 mlNote:'Runs on your device and is free. The first time it downloads a model (about 155 MB) and then keeps it. Photos are never uploaded. It can make mistakes, so it always asks you to confirm.',
 mlConfirm:'This will download about 155 MB (once). Better on Wi-Fi. Continue?',
+bgName:'✂️ Background removal',bgNote:'Cuts the background out of your photos, on your device (nothing is uploaded). The first time it downloads a ~45 MB model. On a phone it may take a few seconds per photo.',
+bgConfirm:'Background removal needs a one-time ~45 MB download (better on Wi-Fi). Continue?',
+bgDo:'✂️ Remove background',bgUndo:'↩️ Restore original photo',bgWorking:'✂️ Removing the background…',
+bgFail:'I could not separate the item from the background. I kept the original photo.',bgLoadErr:'The model download failed. Check your connection and try again.',
 mlWait:'Recognising the item…',mlDownloading:p=>`Downloading the model (${p}%). This only happens the first time.`,
 mlGuess:'I think it is:',mlMaybe:'Or maybe:',
 mlFail:'Automatic recognition did not work (it needs a connection the first time). Pick the type manually.',
@@ -334,7 +343,7 @@ const savePlan=()=>ls.set('plan',JSON.stringify(PLAN));
 function loadLoc(){try{const o=JSON.parse(ls.get('loc'));if(o&&typeof o.name==='string'&&Number.isFinite(o.lat)&&Number.isFinite(o.lon))return {name:o.name,lat:o.lat,lon:o.lon,mine:o.mine===true}}catch(e){}return null}
 const S={tab:'closet',filter:'all',items:[],outer:false,outfits:null,msg:'',menu:false,
  gender:['female','male','other'].includes(ls.get('gender'))?ls.get('gender'):null,
- occ:'casual',must:null,mood:'',ml:ls.get('ml')==='1',pal:ls.get('pal')==='1',loc:loadLoc(),editLoc:false,q:'',geo:[],geoMsg:'',geoBusy:false,day:0,wxAll:null,wxErr:'',wxT:0};
+ occ:'casual',must:null,mood:'',ml:ls.get('ml')==='1',pal:ls.get('pal')==='1',bg:ls.get('bg')==='1',loc:loadLoc(),editLoc:false,q:'',geo:[],geoMsg:'',geoBusy:false,day:0,wxAll:null,wxErr:'',wxT:0};
 let draft=null,panel=null;S.subF='';
 let queue=[],qTotal=0,qIndex=0; // photos picked together are reviewed one after another
 const $=s=>document.querySelector(s);
@@ -367,6 +376,7 @@ function cleanItem(o){
   season:SEASONS.includes(o.season)?o.season:'all'};
  if(busy(o))it.pat=o.pat;
  if(MATS.includes(o.mat))it.mat=o.mat;
+ if(o.cut===true&&it.img)it.cut=true;
  if(Number.isFinite(o.price)&&o.price>0&&o.price<=1e6)it.price=Math.round(o.price*100)/100;
  if(typeof o.brand==='string'){const b=o.brand.replace(/[<>"&]/g,'').trim().slice(0,40);if(b)it.brand=b}
  if(Array.isArray(o.w)){const w=[...new Set(o.w.filter(x=>typeof x==='string'&&DATE_RE.test(x)))].sort().slice(-400);if(w.length)it.w=w}
@@ -445,12 +455,15 @@ function detectFull(c){
  const x=t.getContext('2d',{willReadFrequently:true});x.drawImage(c,0,0,N,N);
  const d=x.getImageData(0,0,N,N).data;
  const px=(i,j)=>{const o=(j*N+i)*4;return [d[o],d[o+1],d[o+2]]};
+ // a cut-out photo: only the opaque pixels belong to the item
+ let tr=0;for(let o=3;o<d.length;o+=4)if(d[o]<128)tr++;
+ const cutUse=[];if(tr>N*N*.05)for(let o=0;o<d.length;o+=4)if(d[o+3]>200)cutUse.push([d[o],d[o+1],d[o+2]]);
  const bd=[];for(let i=0;i<N;i++)for(const j of [0,1,N-2,N-1]){bd.push(px(i,j),px(j,i))}
  const m=[0,1,2].map(k=>bd.reduce((s,p)=>s+p[k],0)/bd.length);
  const uniform=bd.reduce((s,p)=>s+dist(p,m),0)/bd.length<28;
  const all=[],kept=[];
  for(let i=6;i<N-6;i++)for(let j=6;j<N-6;j++){const p=px(i,j);all.push(p);if(!(uniform&&dist(p,m)<45))kept.push(p)}
- const use=kept.length>=all.length*.08?kept:all;
+ const use=cutUse.length>20?cutUse:kept.length>=all.length*.08?kept:all;
  const B={};
  for(const p of use){const k=(p[0]>>5)<<6|(p[1]>>5)<<3|(p[2]>>5);const b=B[k]||(B[k]={n:0,s:[0,0,0]});b.n++;b.s[0]+=p[0];b.s[1]+=p[1];b.s[2]+=p[2]}
  let top=null;for(const k in B)if(!top||B[k].n>top.n)top=B[k];
@@ -478,6 +491,70 @@ const LABELS={
  bag:['a handbag','a backpack'],belt:['a belt'],hat:['a hat','a cap','a beanie'],sunglasses:['sunglasses'],
  scarf:['a silk scarf'],winterscarf:['a knitted winter scarf'],gloves:['gloves'],watch:['a wristwatch'],
  necklace:['a necklace'],earrings:['earrings'],bracelet:['a bracelet'],ring:['a jewelry ring'],tights:['tights']};
+/* ---------- background removal (optional, opt-in) ----------
+   BRIA RMBG-1.4 (quantized, ~45 MB) through the same Transformers.js library, run in the browser.
+   Its licence allows personal, non-commercial use. Input is a fixed 1024x1024 image. */
+const BG_MODEL='briaai/RMBG-1.4';
+const BG={p:null,ready:false,pct:0,files:{}};
+function bgProgress(e){
+ if(!e||!e.file)return;
+ const f=BG.files[e.file]||(BG.files[e.file]={l:0,t:0});
+ if(e.status==='progress'){if(Number.isFinite(e.loaded)&&Number.isFinite(e.total)&&e.total>0){f.l=e.loaded;f.t=e.total}else if(Number.isFinite(e.progress)){f.l=e.progress;f.t=100}}
+ else if(e.status==='done'&&f.t)f.l=f.t;
+ let a=0,b=0;for(const k in BG.files){a+=BG.files[k].l;b+=BG.files[k].t}
+ const pct=b?Math.min(100,Math.floor(a/b*100)):0;
+ if(pct!==BG.pct){BG.pct=pct;if(draft||panel)sheet()}}
+function bgLoad(){
+ if(BG.p)return BG.p;
+ BG.pct=0;BG.files={};
+ BG.p=(async()=>{const lib=await ML_IMPORT(ML_LIB);
+  try{lib.env.allowLocalModels=false}catch(_){} // models come from the Hugging Face hub, never from this site
+  const m=await lib.AutoModel.from_pretrained(BG_MODEL,{config:{model_type:'custom'},quantized:true,progress_callback:bgProgress});
+  BG.ready=true;return {lib,m}})().catch(e=>{BG.p=null;BG.ready=false;throw e});
+ return BG.p}
+const imgFromUrl=u=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=u});
+function encodeCut(c){const w=c.toDataURL('image/webp',.86);return w.startsWith('data:image/webp')?w:c.toDataURL('image/png')}
+// Returns the cut-out photo (cropped, transparent background) with its colour/hash, or null if no item was found.
+async function removeBg(src){
+ const {lib,m}=await bgLoad();
+ const im=await imgFromUrl(src),W=im.naturalWidth,H=im.naturalHeight,Z=1024,N=Z*Z;
+ const c=document.createElement('canvas');c.width=c.height=Z;
+ const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0,Z,Z);
+ const d=x.getImageData(0,0,Z,Z).data,f=new Float32Array(3*N);
+ for(let i=0;i<N;i++){f[i]=d[i*4]/255-.5;f[N+i]=d[i*4+1]/255-.5;f[2*N+i]=d[i*4+2]/255-.5}
+ const out=await m({input:new lib.Tensor('float32',f,[1,3,Z,Z])});
+ const md=Object.values(out)[0].data;
+ let mn=Infinity,mx=-Infinity;for(let i=0;i<md.length;i++){const v=md[i];if(v<mn)mn=v;if(v>mx)mx=v}
+ const mc=document.createElement('canvas');mc.width=mc.height=Z;
+ const mctx=mc.getContext('2d'),mi=mctx.createImageData(Z,Z);
+ for(let i=0;i<N;i++){const a=(md[i]-mn)/(mx-mn||1);mi.data[i*4+3]=a<.15?0:a>.85?255:Math.round((a-.15)/.7*255)}
+ mctx.putImageData(mi,0,0);
+ const o=document.createElement('canvas');o.width=W;o.height=H;
+ const ox=o.getContext('2d',{willReadFrequently:true});
+ ox.drawImage(mc,0,0,W,H);ox.globalCompositeOperation='source-in';ox.drawImage(im,0,0,W,H);
+ const od=ox.getImageData(0,0,W,H).data;
+ let x0=W,y0=H,x1=-1,y1=-1,fg=0;
+ for(let y=0;y<H;y++)for(let xx=0;xx<W;xx++){const a=od[(y*W+xx)*4+3];if(a>128)fg++;if(a>40){if(xx<x0)x0=xx;if(xx>x1)x1=xx;if(y<y0)y0=y;if(y>y1)y1=y}}
+ const share=fg/(W*H);
+ if(x1<0||share<.02||share>.98)return null;
+ const pad=Math.round(Math.max(x1-x0,y1-y0)*.04);
+ x0=Math.max(0,x0-pad);y0=Math.max(0,y0-pad);x1=Math.min(W-1,x1+pad);y1=Math.min(H-1,y1+pad);
+ const cc=document.createElement('canvas');cc.width=x1-x0+1;cc.height=y1-y0+1;
+ cc.getContext('2d').drawImage(o,x0,y0,cc.width,cc.height,0,0,cc.width,cc.height);
+ let h=null;try{h=dHash(cc)}catch(_){}
+ const f2=detectFull(cc),sg=suggestColor(f2.lab,f2.id);
+ return {img:encodeCut(cc),h,det:sg.id,auto:f2.id,lab:f2.lab,lc:sg.learned}}
+function startCut(d){
+ if(!d||!d.img||d.cutting)return;
+ if(!d.orig){d.orig=d.img;d.hOrig=d.h}
+ d.cutting=true;d.cutErr=false;
+ removeBg(d.orig).then(r=>{
+  if(!r){d.cutErr='none';return}
+  d.img=r.img;d.h=r.h;d.cut=true;
+  // the colour question has not been answered yet: show the colour of the item itself
+  if(!d.id&&(d.phase==='confirm'||d.phase==='dupchk')){d.det=r.det;d.auto=r.auto;d.lab=r.lab;d.lc=r.lc}
+ },()=>{d.cutErr='load'}).then(()=>{d.cutting=false;if(draft===d)sheet()})}
+
 function mlProgress(e){
  if(!e||!e.file)return;
  const f=ML.files[e.file]||(ML.files[e.file]={p:0,loaded:0,total:0});
@@ -497,7 +574,7 @@ function mlLoad(){
  if(ML.p)return ML.p;
  ML.files={};ML.pct=0;ML.ready=false;
  ML.p=(async()=>{
-  const lib=await ML_IMPORT(ML_LIB),o=()=>({quantized:true,progress_callback:mlProgress}); // separate option objects: the library writes the model file name into them
+  const lib=await ML_IMPORT(ML_LIB);try{lib.env.allowLocalModels=false}catch(_){}const o=()=>({quantized:true,progress_callback:mlProgress}); // separate option objects: the library writes the model file name into them
   const [proc,vm,tok,tm]=await Promise.all([lib.AutoProcessor.from_pretrained(ML_MODEL,{progress_callback:mlProgress}),
    lib.CLIPVisionModelWithProjection.from_pretrained(ML_MODEL,o()),
    lib.AutoTokenizer.from_pretrained(ML_MODEL,{progress_callback:mlProgress}),
@@ -614,6 +691,7 @@ function startGuess(){
 function showPrepared(p){
  qIndex++;
  const d=draft={id:null,img:p.img,h:p.h,color:null,cat:null,season:'all',phase:'dupchk',det:p.det,auto:p.auto,lab:p.lab,lc:p.lc,guess:null};
+ if(S.bg)startCut(d);
  // the same photo already in the closet is detected right away, before any questions
  const go2=dup=>{if(draft!==d)return;if(dup&&dup.strong){d.dup=dup;d.dupEarly=true;d.phase='dup'}else{d.phase='confirm';startGuess()}sheet()};
  findDup(d).then(go2,()=>go2(null))}
@@ -854,7 +932,7 @@ function gridHtml(){
  const list=S.items.filter(i=>(!cats||cats.includes(i.cat))&&!(S.filter==='shoesF'&&S.subF&&i.sub!==S.subF)&&(!q||hay(i).includes(q)));
  return list.length?`<div class="grid">`+list.map(i=>tile(i,'button',`data-act="item" data-v="${i.id}"`)).join('')+`</div>`:`<div class="empty">${S.items.length&&q?T.noMatch:T.empty}</div>`}
 function tile(i,tag='div',attrs=''){
- const inner=i.img?`<img src="${i.img}" alt="">`:`<span style="text-shadow:0 1px 3px rgba(0,0,0,.35)">${EMOJI[i.cat]}</span>`;
+ const inner=i.img?`<img src="${i.img}" alt=""${i.cut?' class="cut"':''}>`:`<span style="text-shadow:0 1px 3px rgba(0,0,0,.35)">${EMOJI[i.cat]}</span>`;
  return `<${tag} class="tile" ${attrs} style="${i.img?'':'background:'+P[i.color][0]}">${inner}<i class="dot" style="background:${P[i.color][0]}"></i></${tag}>`}
 const curWx=()=>S.loc&&S.wxAll?S.wxAll[S.day]:null;
 function drawerHtml(){
@@ -939,6 +1017,7 @@ function panelHtml(){
   `</div><div class="lbl">${T.theme}</div><div class="chips">`+
   ['auto','light','dark'].map(k=>chip(THEME===k,'settheme',k,T.themes[k])).join('')+
   `</div><div class="lbl">${T.palName}</div><div class="chips">${chip(S.pal,'togglepal','',S.pal?T.on:T.off)}</div><div class="small">${T.palNote}</div>
+  <div class="lbl">${T.bgName}</div><div class="chips">${chip(S.bg,'togglebg','',S.bg?T.on:T.off)}</div><div class="small">${T.bgNote}</div>${S.bg&&BG.p&&!BG.ready?`<div class="small">${T.mlDownloading(BG.pct)}</div>`:''}
   <div class="lbl">${T.mlName}</div><div class="chips">${chip(S.ml,'toggleml','',S.ml?T.on:T.off)}</div><div class="small">${T.mlNote}</div>
   <div class="lbl">${T.learnTitle}</div><div class="small">${T.learnNote}</div><div class="small" style="margin-top:6px">${T.learnStats(LEARN.cat.length,LEARN.col.length,LEARN.st.n,LEARN.st.ok)}</div>
   <div class="row"><button class="btn sec" data-act="resetlearn" ${LEARN.cat.length||LEARN.col.length||LEARN.st.n||RATE.length?'':'disabled'}>${T.learnReset}</button></div>
@@ -948,6 +1027,10 @@ function draftHtml(){
  let h=`<h2>${d.id?T.edit:T.addTitle}</h2>`;
  if(qTotal>1&&!d.id&&d.phase!=='photo')h+=`<div class="small" style="margin:-6px 0 8px">${T.photoN(qIndex,qTotal)}</div>`;
  if(d.img)h+=`<img class="prev" src="${d.img}" alt="">`;
+ if(d.img&&d.phase!=='photo'&&d.phase!=='dupchk'){
+  if(d.cutting)h+=`<div class="small" style="margin:-6px 0 10px">${T.bgWorking}${BG.p&&!BG.ready?' '+T.mlDownloading(BG.pct):''}</div>`;
+  else h+=`<div class="chips" style="padding:0 0 10px">`+(d.cut&&d.orig?chip(false,'uncut','',T.bgUndo):d.cut?'':chip(false,'cut','',T.bgDo))+`</div>`+(d.cutErr?`<div class="small" style="margin:-4px 0 10px">${d.cutErr==='load'?T.bgLoadErr:T.bgFail}</div>`:'');
+ }
  const skip=qTotal>1&&!d.id?`<button class="btn sec" data-act="skip">${T.skipB}</button>`:'';
  const back=d.hist&&d.hist.length&&!d.id?`<button class="btn sec" data-act="back">${T.back}</button>`:'';
  if(d.phase==='photo'){
@@ -1032,6 +1115,7 @@ async function doSave(a){
    season:draft.season||'all',occ:Array.isArray(draft.occ)&&draft.occ.length?draft.occ:occOf(draft),t:draft.t||Date.now()};
   if(busy(draft))it.pat=patOf(draft);
   if(MATS.includes(draft.mat))it.mat=draft.mat;
+  if(draft.cut&&it.img)it.cut=true;
   if(Number.isFinite(draft.price)&&draft.price>0&&draft.price<=1e6)it.price=Math.round(draft.price*100)/100;
   {const b=String(draft.brand||'').replace(/[<>"&]/g,'').trim().slice(0,40);if(b)it.brand=b}
   if(Array.isArray(draft.w)&&draft.w.length)it.w=draft.w;
@@ -1099,6 +1183,13 @@ document.addEventListener('click',async e=>{
  else if(a==='subfilter'){S.subF=v;render()}
  else if(a==='back'){const d=draft;if(d&&d.hist&&d.hist.length){const prev=d.hist.pop();if(prev==='confirm')d.color=null;if(prev==='confirm'||prev==='confirmcat')d.cat=null;if(prev!=='form')d.sub=null;d.phase=prev;sheet()}}
  else if(a==='skip'){advance()}
+ else if(a==='togglebg'||a==='cut'){
+  if(a==='togglebg'&&S.bg){S.bg=false;ls.set('bg','0');sheet();return}
+  if(!S.bg){if(!confirm(T.bgConfirm))return;S.bg=true;ls.set('bg','1')}
+  if(a==='cut'&&draft)startCut(draft);
+  bgLoad().then(()=>{if(draft||panel)sheet()},()=>{if(a==='togglebg')alert(T.bgLoadErr);if(draft||panel)sheet()});
+  sheet()}
+ else if(a==='uncut'){if(draft&&draft.orig){draft.img=draft.orig;draft.h=draft.hOrig;draft.cut=false;sheet()}}
  else if(a==='togglepal'){S.pal=!S.pal;ls.set('pal',S.pal?'1':'0');if(draft||panel)sheet();else render()}
  else if(a==='toggleml'){
   if(S.ml){S.ml=false;ls.set('ml','0');render()}
