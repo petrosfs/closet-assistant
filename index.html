@@ -59,6 +59,13 @@ nav button.on{color:var(--acc);font-weight:700}
 .piece{width:86px;flex:none;text-align:center;font-size:12px}
 .piece .tile{font-size:28px;margin-bottom:4px}
 .piece span{color:var(--mut);display:block}
+.statrow{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:14px}
+.statrow b{width:110px;flex:none;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar{flex:1;height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.bar span{display:block;height:100%;background:var(--acc)}
+.packrow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:none;padding:6px 0;color:var(--ink);font:inherit}
+.packrow .tile{width:48px;flex:none;font-size:20px}
+.packrow.done{opacity:.5}.packrow.done .t{text-decoration:line-through}
 .dayh{padding:16px 16px 6px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .dayrow{display:flex;gap:8px;overflow-x:auto;padding:0 16px 4px}
 .dayrow .tile{width:76px;flex:none}
@@ -89,6 +96,16 @@ favSave:'Αγαπημένο',favTitle:'♥ Αγαπημένοι συνδυασμ
 diaryEmpty:'Δεν έχεις καταγράψει ακόμη τι φόρεσες. Πάτα «Το φόρεσα σήμερα» σε έναν συνδυασμό ή σε ένα είδος της ντουλάπας.',
 undoDay:'Αφαίρεση ημέρας',undoDayQ:'Να αφαιρεθεί αυτή η ημέρα από το ημερολόγιο;',
 wornN:(n,d)=>`Φορέθηκε ${n} ${n===1?'φορά':'φορές'} · τελευταία: ${d}`,wornNever:'Δεν το έχεις καταγράψει ακόμη ως φορεμένο.',
+priceQ:'Τιμή αγοράς σε € (προαιρετικά)',
+statsM:'📊 Στατιστικά',statsNote:'Βασίζονται σε ό,τι έχεις καταγράψει στο ημερολόγιο («Το φόρεσα σήμερα»). Όσο περισσότερο το καταγράφεις, τόσο πιο αληθινά είναι.',
+stTotal:(n,w)=>`${n} είδη · ${w} έχουν καταγραφεί ως φορεμένα`,stTop:'Τα πιο φορεμένα',stStale:'Δεν τα έχεις φορέσει (πάνω από 30 ημέρες στην ντουλάπα)',stCat:'Ανά κατηγορία',stCol:'Ανά χρώμα',
+stNone:'Δεν υπάρχουν ακόμη δεδομένα.',stTimes:n=>`${n}×`,stCost:'Κόστος ανά φορά',stCostNote:'Μόνο για είδη με τιμή και τουλάχιστον μία φορά φορεμένα.',
+stSpent:(n,t)=>`Έχεις βάλει τιμή σε ${n} είδη, σύνολο ${t}.`,stUnwornValue:t=>`Αξία ειδών με τιμή που δεν έχεις φορέσει: ${t}.`,
+packM:'🧳 Βαλίτσα',packDays:'Πόσες ημέρες;',packOcc:'Για ποιες περιστάσεις;',packWx:'Καιρός',packWxs:{auto:'Από την πρόγνωση',warm:'Ζεστός',mild:'Μέτριος',cold:'Κρύος'},
+packAutoNo:'Δεν έχεις βάλει τοποθεσία, οπότε θα θεωρηθεί μέτριος καιρός.',packGo:'Φτιάξε λίστα',packAgain:'Αλλαγή επιλογών',
+packTitle:(d,c)=>`${d} ${d===1?'ημέρα':'ημέρες'} · ${c}`,packCombos:n=>`Με αυτά φτιάχνονται τουλάχιστον ${n} συνδυασμοί ρούχων.`,packDone:(a,b)=>`Έτοιμα ${a} από ${b}`,
+packMissing:(c,h,n)=>`${c}: έχεις ${h}, χρειάζονται περίπου ${n}.`,packEmpty:'Δεν βρέθηκαν κατάλληλα είδη. Δοκίμασε άλλες περιστάσεις ή καιρό, ή πρόσθεσε ρούχα.',
+packNote:'Πρόταση με βάση τη ντουλάπα σου: προτιμώ ουδέτερα χρώματα που ταιριάζουν μεταξύ τους και ό,τι φοράς συχνά. Δεν υπολογίζει εσώρουχα, καλλυντικά ή φορτιστές.',
 matQ:'Υλικό (προαιρετικά)',mats:{cotton:'Βαμβάκι',wool:'Μαλλί',linen:'Λινό',denim:'Τζιν',leather:'Δέρμα',silk:'Μετάξι',synthetic:'Συνθετικό',knit:'Πλεκτό',other:'Άλλο'},
 brandQ:'Μάρκα (προαιρετικά)',searchPh:'Αναζήτηση: μάρκα, υλικό, χρώμα…',noMatch:'Δεν βρέθηκε κάποιο είδος.',
 pats:{solid:'Μονόχρωμο',multi:'Πολύχρωμο',print:'Εμπριμέ',dots:'Πουά',stripes:'Ριγέ',checks:'Καρό',animal:'Animal print',other:'Άλλο σχέδιο'},
@@ -149,6 +166,16 @@ favSave:'Favourite',favTitle:'♥ Favourite outfits',favDel:'Remove',
 diaryEmpty:'Nothing logged yet. Tap “I wore this today” on an outfit or on an item in your closet.',
 undoDay:'Remove day',undoDayQ:'Remove this day from the diary?',
 wornN:(n,d)=>`Worn ${n} ${n===1?'time':'times'} · last: ${d}`,wornNever:'Not logged as worn yet.',
+priceQ:'Purchase price in € (optional)',
+statsM:'📊 Statistics',statsNote:'Based on what you logged in the diary (“I wore this today”). The more you log, the more accurate it gets.',
+stTotal:(n,w)=>`${n} items · ${w} logged as worn`,stTop:'Most worn',stStale:'Not worn yet (in your closet for over 30 days)',stCat:'By category',stCol:'By colour',
+stNone:'No data yet.',stTimes:n=>`${n}×`,stCost:'Cost per wear',stCostNote:'Only for items with a price that were worn at least once.',
+stSpent:(n,t)=>`You entered a price for ${n} items, total ${t}.`,stUnwornValue:t=>`Value of priced items you have not worn: ${t}.`,
+packM:'🧳 Packing',packDays:'How many days?',packOcc:'For which occasions?',packWx:'Weather',packWxs:{auto:'From the forecast',warm:'Warm',mild:'Mild',cold:'Cold'},
+packAutoNo:'No location set, so mild weather is assumed.',packGo:'Make the list',packAgain:'Change options',
+packTitle:(d,c)=>`${d} ${d===1?'day':'days'} · ${c}`,packCombos:n=>`These make at least ${n} outfit combinations.`,packDone:(a,b)=>`Packed ${a} of ${b}`,
+packMissing:(c,h,n)=>`${c}: you have ${h}, about ${n} needed.`,packEmpty:'No suitable items found. Try other occasions or weather, or add clothes.',
+packNote:'Suggestion from your closet: I prefer neutral colours that mix well and what you wear often. It does not cover underwear, toiletries or chargers.',
 matQ:'Material (optional)',mats:{cotton:'Cotton',wool:'Wool',linen:'Linen',denim:'Denim',leather:'Leather',silk:'Silk',synthetic:'Synthetic',knit:'Knit',other:'Other'},
 brandQ:'Brand (optional)',searchPh:'Search: brand, material, colour…',noMatch:'No matching item.',
 pats:{solid:'Plain',multi:'Multicolour',print:'Printed',dots:'Polka dots',stripes:'Striped',checks:'Checked',animal:'Animal print',other:'Other pattern'},
@@ -307,6 +334,7 @@ function cleanItem(o){
   season:SEASONS.includes(o.season)?o.season:'all'};
  if(busy(o))it.pat=o.pat;
  if(MATS.includes(o.mat))it.mat=o.mat;
+ if(Number.isFinite(o.price)&&o.price>0&&o.price<=1e6)it.price=Math.round(o.price*100)/100;
  if(typeof o.brand==='string'){const b=o.brand.replace(/[<>"&]/g,'').trim().slice(0,40);if(b)it.brand=b}
  if(Array.isArray(o.w)){const w=[...new Set(o.w.filter(x=>typeof x==='string'&&DATE_RE.test(x)))].sort().slice(-400);if(w.length)it.w=w}
  if(Array.isArray(o.occ)){const occ=OCC.filter(x=>o.occ.includes(x));if(occ.length)it.occ=occ}
@@ -689,6 +717,93 @@ function diaryView(){
  return days.map(d=>`<div class="dayh">${esc(fmtDate(d))}<button class="lnk" data-act="undoday" data-v="${d}">${T.undoDay}</button></div><div class="dayrow">`+
   by[d].map(i=>tile(i,'button',`data-act="item" data-v="${i.id}"`)).join('')+`</div>`).join('')+'<div style="height:24px"></div>'}
 
+/* ---------- statistics ---------- */
+const wearsOf=i=>Array.isArray(i.w)?i.w.length:0;
+const money=n=>(LANG==='el'?n.toFixed(2).replace('.',','):n.toFixed(2))+' €';
+function statsOf(items){
+ const worn=items.filter(i=>wearsOf(i)>0);
+ const top=[...worn].sort((a,b)=>wearsOf(b)-wearsOf(a)||((lastWorn(b)||'')>(lastWorn(a)||'')?1:-1)).slice(0,5);
+ const stale=items.filter(i=>wearsOf(i)===0&&Date.now()-i.t>30*864e5).sort((a,b)=>a.t-b.t).slice(0,12);
+ const byCat={},byCol={};
+ for(const i of items){byCat[i.cat]=(byCat[i.cat]||0)+1;const f=fam(i.color);byCol[f]=(byCol[f]||0)+1}
+ const priced=items.filter(i=>i.price>0);
+ const cpw=priced.filter(i=>wearsOf(i)>0).map(i=>({i,v:i.price/wearsOf(i)})).sort((a,b)=>a.v-b.v);
+ return {n:items.length,wornN:worn.length,top,stale,byCat,byCol,priced:priced.length,
+  spent:priced.reduce((t,i)=>t+i.price,0),unworn:priced.filter(i=>wearsOf(i)===0).reduce((t,i)=>t+i.price,0),cpw}}
+const sortCount=o=>Object.entries(o).sort((a,b)=>b[1]-a[1]||(a[0]<b[0]?-1:1));
+function barRows(rows,max,label){return rows.map(([k,n])=>`<div class="statrow"><b>${esc(label(k))}</b><div class="bar"><span style="width:${Math.max(4,Math.round(n/max*100))}%"></span></div><span>${n}</span></div>`).join('')}
+function statsHtml(){
+ const st=statsOf(S.items);
+ let h=`<h2>${T.statsM}</h2>`;
+ if(!st.n)return h+`<div class="empty">${T.empty}</div><div class="row"><button class="btn sec" data-act="close">${T.close}</button></div>`;
+ h+=`<div style="margin-bottom:4px"><b>${T.stTotal(st.n,st.wornN)}</b></div><div class="small">${T.statsNote}</div>`;
+ const mini=(list,extra)=>`<div class="dayrow" style="padding:0 0 4px">`+list.map(i=>`<div style="width:76px;flex:none;text-align:center;font-size:12px">${tile(i,'button',`data-act="item" data-v="${i.id}"`)}${extra?`<span style="color:var(--mut)">${extra(i)}</span>`:''}</div>`).join('')+`</div>`;
+ h+=`<div class="lbl">${T.stTop}</div>`+(st.top.length?mini(st.top,i=>T.stTimes(wearsOf(i))):`<div class="small">${T.stNone}</div>`);
+ if(st.stale.length)h+=`<div class="lbl">${T.stStale}</div>`+mini(st.stale);
+ h+=`<div class="lbl">${T.stCat}</div>`+barRows(sortCount(st.byCat),Math.max(...Object.values(st.byCat)),k=>T.cats[k]||k);
+ h+=`<div class="lbl">${T.stCol}</div>`+barRows(sortCount(st.byCol).slice(0,8),Math.max(...Object.values(st.byCol)),k=>cname(k));
+ if(st.priced){
+  h+=`<div class="lbl">${T.stCost}</div><div class="small">${T.stSpent(st.priced,money(st.spent))}${st.unworn>0?' '+T.stUnwornValue(money(st.unworn)):''}</div>`;
+  if(st.cpw.length){h+=`<div class="small" style="margin-bottom:4px">${T.stCostNote}</div>`+st.cpw.slice(0,8).map(x=>`<div class="statrow"><div style="width:44px;flex:none">${tile(x.i)}</div><b style="flex:1">${T.cats[x.i.cat]} · ${esc(cname(x.i.color))}</b><span>${money(x.v)}</span></div>`).join('')}}
+ return h+`<div class="row"><button class="btn sec" data-act="close">${T.close}</button></div>`}
+
+/* ---------- packing list ---------- */
+const newPack=()=>({days:3,occs:['casual'],wx:'auto',list:null,checked:{}});
+function packCond(wxSel){
+ if(wxSel!=='auto')return wxSel;
+ const w=curWx();if(!w)return 'mild';
+ return w.tmax>=25?'warm':w.tmax<15?'cold':'mild'}
+function packList(items,o){
+ const d=o.days,male=S.gender==='male';
+ const fav=new Set(FAV.flatMap(f=>f.ids));
+ const seasonFit=i=>{const s=i.season||'all';return o.cond==='warm'?s!=='cold':o.cond==='cold'?s!=='warm':true};
+ const pool=items.filter(i=>seasonFit(i)&&!(male&&MALE_HIDE.includes(i.cat))&&occOf(i).some(x=>o.occs.includes(x)));
+ const sc=i=>(P[fam(i.color)][2]?2:0)+Math.min(wearsOf(i),5)*.3+(fav.has(i.id)?1:0)+Math.random()*.3;
+ const by=cat=>pool.filter(i=>Array.isArray(cat)?cat.includes(i.cat):i.cat===cat).sort((a,b)=>sc(b)-sc(a));
+ const ones=by(['dress','jumpsuit']),nOne=Math.min(ones.length,Math.ceil(d/4));
+ const cover=Math.max(0,d-nOne);
+ const need={top:cover?Math.min(8,Math.max(2,Math.ceil(cover*.7))):0,bottom:cover?Math.min(4,Math.max(1,Math.ceil(cover/2.5))):0,
+  outer:o.cond==='cold'?2:o.cond==='mild'?1:0,shoes:Math.min(3,Math.max(1,o.occs.length)+(d>=7?1:0))};
+ const groups=[],missing=[];
+ const take=(cat,n,label)=>{if(n<=0)return [];const got=by(cat).slice(0,n);
+  if(got.length<n)missing.push(T.packMissing(label||T.cats[cat],got.length,n));
+  if(got.length)groups.push({cat:label||cat,items:got});return got};
+ const chosenOnes=nOne?ones.slice(0,nOne):[];
+ if(chosenOnes.length)groups.push({cat:'dress',items:chosenOnes});
+ const tops=take('top',need.top),bots=take('bottom',need.bottom);
+ take('outer',need.outer);take('shoes',need.shoes);
+ const accs=['bag','belt','watch'];
+ if(o.cond!=='cold')accs.push('sunglasses');
+ if(o.cond==='warm')accs.push('hat');
+ if(o.cond!=='warm')accs.push('scarf');
+ if(o.cond==='cold'){accs.push('winterscarf','gloves');if(chosenOnes.length)accs.push('tights')}
+ if(o.occs.includes('smart')||o.occs.includes('formal'))accs.push('necklace','earrings','bracelet','ring');
+ const accItems=[];
+ for(const c of accs){if(male&&MALE_HIDE.includes(c))continue;const g=by(c).slice(0,1);if(g.length)accItems.push(...g)}
+ if(accItems.length)groups.push({cat:'acc',items:accItems});
+ let combos=chosenOnes.length;
+ for(const t of tops)for(const b of bots)if(fit([t,b])>=0)combos++;
+ return {groups,combos,missing,total:groups.reduce((n,g)=>n+g.items.length,0),cond:o.cond,days:d}}
+function packHtml(){
+ const pk=S.pack||(S.pack=newPack());
+ let h=`<h2>${T.packM}</h2>`;
+ if(!pk.list){
+  h+=`<div class="lbl">${T.packDays}</div><div class="chips">`+[1,2,3,4,5,7,10,14].map(n=>chip(pk.days===n,'packdays',n,n)).join('')+`</div>`;
+  h+=`<div class="lbl">${T.packOcc}</div><div class="chips">`+OCC.map(x=>chip(pk.occs.includes(x),'packocc',x,T.occs[x])).join('')+`</div>`;
+  h+=`<div class="lbl">${T.packWx}</div><div class="chips">`+['auto','warm','mild','cold'].map(k=>chip(pk.wx===k,'packwx',k,T.packWxs[k])).join('')+`</div>`;
+  if(pk.wx==='auto'&&!curWx())h+=`<div class="small">${T.packAutoNo}</div>`;
+  if(!S.items.length)h+=`<div class="empty">${T.empty}</div>`;
+  return h+`<div class="row"><button class="btn" data-act="packgo" ${S.items.length?'':'disabled'}>${T.packGo}</button><button class="btn sec" data-act="close">${T.close}</button></div>`}
+ const L=pk.list,done=L.groups.reduce((n,g)=>n+g.items.filter(i=>pk.checked[i.id]).length,0);
+ h+=`<div style="margin-bottom:4px"><b>${T.packTitle(L.days,T.packWxs[L.cond])}</b> · ${T.packDone(done,L.total)}</div>`;
+ if(!L.total)h+=`<div class="empty">${T.packEmpty}</div>`;
+ else{
+  if(L.combos)h+=`<div class="small">${T.packCombos(L.combos)}</div>`;
+  for(const m of L.missing)h+=`<div class="small" style="color:var(--acc)">${esc(m)}</div>`;
+  h+=L.groups.map(g=>`<div class="lbl" style="margin:12px 0 4px"><b>${g.cat==='acc'?T.acc:(T.cats[g.cat]||esc(g.cat))}</b></div>`+g.items.map(i=>
+   `<button class="packrow ${pk.checked[i.id]?'done':''}" data-act="packtick" data-v="${i.id}">${tile(i)}<span class="t" style="flex:1">${T.cats[i.cat]} · ${esc(cname(i.color))}${i.brand?' · '+esc(i.brand):''}</span><span>${pk.checked[i.id]?'☑':'☐'}</span></button>`).join('')).join('')}
+ return h+`<div class="small" style="margin-top:10px">${T.packNote}</div><div class="row"><button class="btn sec" data-act="packagain">${T.packAgain}</button><button class="btn sec" data-act="close">${T.close}</button></div>`}
+
 /* ---------- views ---------- */
 const hay=i=>[T.cats[i.cat],cname(i.color),i.brand||'',i.mat?T.mats[i.mat]:'',busy(i)?T.pats[patOf(i)]:''].join(' ').toLowerCase();
 function gridHtml(){
@@ -702,6 +817,8 @@ const curWx=()=>S.loc&&S.wxAll?S.wxAll[S.day]:null;
 function drawerHtml(){
  return `<div class="dw ${S.menu?'open':''}"><div class="drawer-bg" data-act="menu"></div><aside class="drawer">
  <div class="dh">${T.title}</div>
+ <button class="mi" data-act="stats">${T.statsM}</button>
+ <button class="mi" data-act="pack">${T.packM}</button>
  <button class="mi" data-act="profile">👤 ${T.profile}</button>
  <button class="mi" data-act="settings">⚙️ ${T.settings}</button>
  <div class="mh">${T.backup}</div>
@@ -766,6 +883,8 @@ function panelHtml(){
  if(panel==='pickitem')return `<h2>${T.mustQ}</h2>`+(S.items.length?`<div class="grid" style="padding:0 0 12px">`+
   S.items.map(i=>tile(i,'button',`data-act="pickmust" data-v="${i.id}"`)).join('')+`</div>`:`<div class="empty">${T.empty}</div>`)+
   `<div class="row"><button class="btn sec" data-act="close">${T.cancel}</button></div>`;
+ if(panel==='stats')return statsHtml();
+ if(panel==='pack')return packHtml();
  if(panel==='profile')return `<h2>👤 ${T.profile}</h2><div class="lbl">${T.gender}</div><div class="chips">`+
   ['female','male','other'].map(g=>chip(S.gender===g,'setgender',g,T.genders[g])).join('')+
   `</div><div class="small">${T.genderNote}</div><div class="row"><button class="btn sec" data-act="close">${T.close}</button></div>`;
@@ -835,6 +954,7 @@ function draftHtml(){
   const occ=occOf(d);
   h+=`<div class="lbl">${T.patQ}</div><div class="chips">`+PATS.map(k=>chip(patOf(d)===k,'pat',k,T.pats[k])).join('')+`</div>`;
   h+=`<div class="lbl">${T.matQ}</div><div class="chips">`+MATS.map(k=>chip(d.mat===k,'mat',k,T.mats[k])).join('')+`</div>`;
+  h+=`<div class="lbl">${T.priceQ}</div><input id="price" class="inp" style="width:100%" inputmode="decimal" maxlength="9" value="${d.price?esc(String(d.price)):''}" autocomplete="off">`;
   h+=`<div class="lbl">${T.brandQ}</div><input id="brand" class="inp" style="width:100%" maxlength="40" value="${esc(d.brand||'')}" autocomplete="off">`;
   h+=`<div class="lbl">${T.occQ}</div><div class="chips">`+OCC.map(o=>chip(occ.includes(o),'occ',o,T.occs[o])).join('')+`</div>`;
   h+=`<div class="lbl">${T.seasonQ}</div><div class="chips">`+SEASONS.map(s=>chip((d.season||'all')===s,'season',s,T.seasons[s])).join('')+`</div>`;
@@ -866,6 +986,7 @@ async function doSave(a){
    season:draft.season||'all',occ:Array.isArray(draft.occ)&&draft.occ.length?draft.occ:occOf(draft),t:draft.t||Date.now()};
   if(busy(draft))it.pat=patOf(draft);
   if(MATS.includes(draft.mat))it.mat=draft.mat;
+  if(Number.isFinite(draft.price)&&draft.price>0&&draft.price<=1e6)it.price=Math.round(draft.price*100)/100;
   {const b=String(draft.brand||'').replace(/[<>"&]/g,'').trim().slice(0,40);if(b)it.brand=b}
   if(Array.isArray(draft.w)&&draft.w.length)it.w=draft.w;
   if(it.cat==='shoes'&&SUBS.includes(draft.sub))it.sub=draft.sub;
@@ -886,6 +1007,13 @@ document.addEventListener('click',async e=>{
  const a=b.dataset.act,v=b.dataset.v;
  if(a==='menu'){S.menu=!S.menu;const d=$('.dw');if(d)d.classList.toggle('open',S.menu)}
  else if(a==='profile'||a==='settings'){S.menu=false;panel=a;render()}
+ else if(a==='stats'||a==='pack'){S.menu=false;panel=a;if(a==='pack'&&!S.pack)S.pack=newPack();render()}
+ else if(a==='packdays'){const n=+v;if([1,2,3,4,5,7,10,14].includes(n)){S.pack.days=n;sheet()}}
+ else if(a==='packocc'){if(OCC.includes(v)){const c=S.pack.occs,n=c.includes(v)?c.filter(x=>x!==v):[...c,v];if(n.length){S.pack.occs=OCC.filter(x=>n.includes(x));sheet()}}}
+ else if(a==='packwx'){if(['auto','warm','mild','cold'].includes(v)){S.pack.wx=v;sheet()}}
+ else if(a==='packgo'){const pk=S.pack;pk.list=packList(S.items,{days:pk.days,occs:pk.occs,cond:packCond(pk.wx)});pk.checked={};sheet()}
+ else if(a==='packtick'){const pk=S.pack;if(pk&&pk.list&&pk.list.groups.some(g=>g.items.some(i=>i.id===v))){pk.checked[v]=!pk.checked[v];sheet()}}
+ else if(a==='packagain'){S.pack.list=null;sheet()}
  else if(a==='export'){S.menu=false;exportData();render()}
  else if(a==='setlang'){LANG=v;ls.set('lang',v);render()}
  else if(a==='settheme'){THEME=v;ls.set('theme',v);render()}
@@ -973,6 +1101,7 @@ document.addEventListener('click',async e=>{
 document.addEventListener('input',e=>{
  const t=e.target;if(!t)return;
  if(t.id==='q')S.q=t.value;
+ else if(t.id==='price'&&draft){const v=parseFloat(String(t.value).replace(',','.'));draft.price=Number.isFinite(v)&&v>0&&v<=1e6?Math.round(v*100)/100:undefined}
  else if(t.id==='brand'&&draft)draft.brand=String(t.value).slice(0,40);
  else if(t.id==='cs'){S.cq=t.value;const g=$('#gridwrap');if(g)g.innerHTML=gridHtml()}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='q'){e.preventDefault();doSearch()}});
