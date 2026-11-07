@@ -123,7 +123,8 @@ mlFail:'Η αυτόματη αναγνώριση δεν δούλεψε (χρει
 learnTitle:'Εκμάθηση',learnNote:'Κάθε φορά που επιβεβαιώνεις ή διορθώνεις ένα είδος ή ένα χρώμα, το θυμάμαι (μόνο στη συσκευή σου) και γίνομαι πιο σωστός στα επόμενα.',
 learnStats:(c,k,n,ok)=>`Θυμάμαι ${c} είδη και ${k} διορθώσεις χρώματος.`+(n?` Σωστή πρώτη πρόταση είδους: ${ok} από ${n}.`:''),
 learnReset:'Σβήσε ό,τι έμαθα',learnResetQ:'Θα σβηστούν όσα έχω μάθει από τις επιβεβαιώσεις σου. Οι φωτογραφίες και η ντουλάπα σου δεν επηρεάζονται. Συνέχεια;',
-learnedColor:'Το πρότεινα από όσα μου έχεις δείξει πριν.',learnedCat:'Βοήθησαν και όσα έχεις επιβεβαιώσει πριν.'},
+learnedColor:'Το πρότεινα από όσα μου έχεις δείξει πριν.',learnedCat:'Βοήθησαν και όσα έχεις επιβεβαιώσει πριν.',
+back:'Πίσω',mlHint:'Υπάρχει αυτόματη αναγνώριση είδους: ενεργοποίησέ την από το μενού ☰ → Ρυθμίσεις.',mlNone:'Δεν είμαι σίγουρος για το είδος. Διάλεξέ το εσύ και θα το θυμάμαι.'},
 en:{title:'Closet Assistant',closet:'👗 Closet',suggest:'✨ Suggest',all:'All',clothes:'Clothes',shoesF:'Shoes',acc:'Accessories',
 cats:{top:'Top',bottom:'Bottom',dress:'Dress',jumpsuit:'Jumpsuit',outer:'Outerwear',shoes:'Shoes',bag:'Bag',belt:'Belt',hat:'Hat',sunglasses:'Sunglasses',scarf:'Scarf',winterscarf:'Winter scarf',gloves:'Gloves',watch:'Watch',necklace:'Necklace',earrings:'Earrings',bracelet:'Bracelet',ring:'Ring',tights:'Tights',jewelry:'Jewelry (other)'},
 empty:'Your closet is empty. Tap + to add your first item.',
@@ -174,7 +175,8 @@ mlFail:'Automatic recognition did not work (it needs a connection the first time
 learnTitle:'Learning',learnNote:'Every time you confirm or correct an item type or colour I remember it (on your device only) and get better at the next ones.',
 learnStats:(c,k,n,ok)=>`I remember ${c} items and ${k} colour corrections.`+(n?` First type guess correct: ${ok} of ${n}.`:''),
 learnReset:'Erase what I learned',learnResetQ:'This erases what I learned from your confirmations. Your photos and closet are not affected. Continue?',
-learnedColor:'Suggested based on what you showed me before.',learnedCat:'What you confirmed before also helped.'}
+learnedColor:'Suggested based on what you showed me before.',learnedCat:'What you confirmed before also helped.',
+back:'Back',mlHint:'Automatic item recognition is available: turn it on from the ☰ menu → Settings.',mlNone:'I am not sure about the type. Pick it and I will remember it.'}
 };
 // id: [hex, hue, neutral, el, en]
 const P={
@@ -481,19 +483,23 @@ function startGuess(){
  const d=draft;
  if(!S.ml){d.guess=null;return}
  d.guess='loading';
- guessCat(d.img).then(r=>{d.guess=r.ranked;d.emb=r.emb;d.lcat=r.used},()=>{d.guess=null;d.mlErr=true}).then(()=>{
+ guessCat(d.img).then(r=>{d.guess=r.ranked;d.emb=r.emb;d.lcat=r.used;d.mlNone=!r.ranked},()=>{d.guess=null;d.mlErr=true}).then(()=>{
   if(draft!==d)return;
   if(d.phase==='confirmcat'&&d.guess===null)d.phase='form';
   sheet()})}
 function showPrepared(p){
  qIndex++;
- draft={id:null,img:p.img,h:p.h,color:null,cat:null,season:'all',phase:'confirm',det:p.det,auto:p.auto,lab:p.lab,lc:p.lc,guess:null};
- startGuess()}
+ const d=draft={id:null,img:p.img,h:p.h,color:null,cat:null,season:'all',phase:'dupchk',det:p.det,auto:p.auto,lab:p.lab,lc:p.lc,guess:null};
+ // the same photo already in the closet is detected right away, before any questions
+ const go2=dup=>{if(draft!==d)return;if(dup&&dup.strong){d.dup=dup;d.dupEarly=true;d.phase='dup'}else{d.phase='confirm';startGuess()}sheet()};
+ findDup(d).then(go2,()=>go2(null))}
 function advance(){
  if(queue.length)showPrepared(queue.shift());
  else{draft=null;queue=[];qTotal=0;qIndex=0}
  sheet()}
-const afterColor=()=>{draft.phase=S.ml&&draft.guess!==null?'confirmcat':'form'};
+// every step forward remembers where it came from, so Back can undo a mistaken tap
+const go=ph=>{(draft.hist||(draft.hist=[])).push(draft.phase);draft.phase=ph};
+const afterColor=()=>go(S.ml&&draft.guess!==null?'confirmcat':'form');
 
 /* ---------- outfit logic ---------- */
 const hueDiff=(a,b)=>{const d=Math.abs(a-b)%360;return d>180?360-d:d};
@@ -657,6 +663,7 @@ function draftHtml(){
  if(qTotal>1&&!d.id&&d.phase!=='photo')h+=`<div class="small" style="margin:-6px 0 8px">${T.photoN(qIndex,qTotal)}</div>`;
  if(d.img)h+=`<img class="prev" src="${d.img}" alt="">`;
  const skip=qTotal>1&&!d.id?`<button class="btn sec" data-act="skip">${T.skipB}</button>`:'';
+ const back=d.hist&&d.hist.length&&!d.id?`<button class="btn sec" data-act="back">${T.back}</button>`:'';
  if(d.phase==='photo'){
   if(d.busy)h+=`<div class="lbl">${T.processing}</div>`;
   else{
@@ -670,6 +677,7 @@ function draftHtml(){
   h+=`<div class="lbl">${T.detected}</div><div class="det"><i style="background:${P[d.det][0]}"></i><b>${cname(d.det)}</b></div>${d.lc?`<div class="small">${T.learnedColor}</div>`:''}<div class="lbl">${T.correct}</div>
   <div class="row"><button class="btn" data-act="yes">${T.yes}</button><button class="btn sec" data-act="no">${T.no}</button></div>`;
   if(skip)h+=`<div class="row">${skip}</div>`;
+ }else if(d.phase==='dupchk'){h+=`<div class="lbl">${T.processing}</div>`;
  }else if(d.phase==='dup'&&d.dup){
   const o=d.dup.it;
   h+=`<div class="lbl">${d.dup.strong?T.dupStrong:T.dupWeak}</div><div class="row" style="align-items:flex-start"><div style="flex:1;text-align:center"><div class="small">${T.dupOld}</div>${o.img?`<img class="prev" src="${o.img}" alt="">`:`<div style="font-size:48px">${EMOJI[o.cat]}</div>`}</div><div style="flex:1;text-align:center"><div class="small">${T.dupNew}</div>${d.img?`<img class="prev" src="${d.img}" alt="">`:`<div style="font-size:48px">${EMOJI[d.cat]}</div>`}</div></div>
@@ -682,9 +690,11 @@ function draftHtml(){
    h+=`<div class="lbl">${T.mlGuess}</div><div class="det"><span style="font-size:32px">${EMOJI[g[0].cat]}</span><b>${T.cats[g[0].cat]}</b></div>${d.lcat?`<div class="small">${T.learnedCat}</div>`:''}<div class="lbl">${T.correct}</div>
   <div class="row"><button class="btn" data-act="guessyes">${T.yes}</button><button class="btn sec" data-act="guessno">${T.no}</button></div>`;
    if(g.length>1)h+=`<div class="lbl">${T.mlMaybe}</div><div class="chips">`+g.slice(1).map(x=>chip(false,'pickguess',x.cat,`${EMOJI[x.cat]} ${T.cats[x.cat]}`)).join('')+`</div>`}
-  if(skip)h+=`<div class="row">${skip}</div>`;
+  if(skip||back)h+=`<div class="row">${back}${skip}</div>`;
  }else{
   if(d.mlErr)h+=`<div class="small" style="margin-bottom:6px">${T.mlFail}</div>`;
+  else if(!S.ml&&!d.id)h+=`<div class="small" style="margin-bottom:6px">${T.mlHint}</div>`;
+  else if(d.mlNone&&!d.cat)h+=`<div class="small" style="margin-bottom:6px">${T.mlNone}</div>`;
   const wide=S.pal||(d.color&&own(PX,d.color));
   h+=`<div class="lbl">${T.pickColor}${d.color?': <b>'+cname(d.color)+'</b>':''}</div><div class="palette${wide?' wide':''}">`+
    (wide?PAL_ALL:BASE).map(k=>`<button class="sw ${d.color===k?'on':''}" style="background:${P[k][0]}" data-act="color" data-v="${k}" aria-label="${esc(cname(k))}" title="${esc(cname(k))}"></button>`).join('')+`</div>`+
@@ -699,7 +709,7 @@ function draftHtml(){
   h+=`<div class="lbl">${T.seasonQ}</div><div class="chips">`+SEASONS.map(s=>chip((d.season||'all')===s,'season',s,T.seasons[s])).join('')+`</div>`;
   const more=!d.id&&qTotal<=1?`<button class="btn sec" data-act="savemore" ${d.color&&d.cat?'':'disabled'}>${T.saveMore}</button>`:'';
   h+=`<div class="row"><button class="btn" data-act="save" ${d.color&&d.cat?'':'disabled'}>${T.save}</button>${more}</div>
-  <div class="row">${skip}<button class="btn sec" data-act="close">${T.cancel}</button></div>`;
+  <div class="row">${back}${skip}<button class="btn sec" data-act="close">${T.cancel}</button></div>`;
   if(d.id)h+=`<div class="row"><button class="btn danger" data-act="del">${T.del}</button></div>`;
  }
  return h}
@@ -764,12 +774,13 @@ document.addEventListener('click',async e=>{
  else if(a==='retry'){S.wxErr='';render();await loadWx();render()}
  else if(a==='fab'){queue=[];qTotal=0;qIndex=0;draft={id:null,img:null,color:null,cat:null,season:'all',phase:'photo',det:null};sheet()}
  else if(a==='item'){const i=S.items.find(x=>x.id===v);if(i){draft={...i,season:i.season||'all',phase:'form'};sheet()}}
- else if(a==='nophoto'){draft.phase='form';sheet()}
+ else if(a==='nophoto'){go('form');sheet()}
  else if(a==='yes'){draft.color=draft.det;afterColor();sheet()}
  else if(a==='no'){afterColor();sheet()}
- else if(a==='guessyes'){if(Array.isArray(draft.guess))draft.cat=draft.guess[0].cat;draft.phase='form';sheet()}
- else if(a==='guessno'){draft.phase='form';sheet()}
- else if(a==='pickguess'){draft.cat=v;draft.phase='form';sheet()}
+ else if(a==='guessyes'){if(Array.isArray(draft.guess))draft.cat=draft.guess[0].cat;go('form');sheet()}
+ else if(a==='guessno'){go('form');sheet()}
+ else if(a==='pickguess'){draft.cat=v;go('form');sheet()}
+ else if(a==='back'){const d=draft;if(d&&d.hist&&d.hist.length){const prev=d.hist.pop();if(prev==='confirm')d.color=null;if(prev==='confirm'||prev==='confirmcat')d.cat=null;d.phase=prev;sheet()}}
  else if(a==='skip'){advance()}
  else if(a==='togglepal'){S.pal=!S.pal;ls.set('pal',S.pal?'1':'0');if(draft||panel)sheet();else render()}
  else if(a==='toggleml'){
@@ -787,7 +798,7 @@ document.addEventListener('click',async e=>{
   if(n.length)draft.occ=OCC.filter(x=>n.includes(x));
   sheet()}
  else if(a==='close'){draft=null;panel=null;queue=[];qTotal=0;qIndex=0;sheet()}
- else if(a==='dupadd'){draft.dupOk=true;draft.phase='form';await doSave(draft.dupAct)}
+ else if(a==='dupadd'){draft.dupOk=true;if(draft.dupEarly){draft.dupEarly=false;draft.dup=null;draft.phase='confirm';startGuess();sheet()}else{draft.phase='form';await doSave(draft.dupAct)}}
  else if(a==='dupskip'){if(queue.length)advance();else{draft=null;queue=[];qTotal=0;qIndex=0;sheet()}}
  else if(a==='save'||a==='savemore'){
   if(!draft.color||!draft.cat)return;
