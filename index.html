@@ -118,7 +118,11 @@ mlNote:'Τρέχει στη συσκευή σου και είναι δωρεάν
 mlConfirm:'Θα κατεβάσει περίπου 155 MB (μία φορά). Καλύτερα με Wi-Fi. Συνέχεια;',
 mlWait:'Αναγνώριση είδους…',mlDownloading:p=>`Κατεβαίνει το μοντέλο (${p}%). Γίνεται μόνο την πρώτη φορά.`,
 mlGuess:'Ανίχνευσα:',mlMaybe:'Ή μήπως:',
-mlFail:'Η αυτόματη αναγνώριση δεν δούλεψε (χρειάζεται σύνδεση την πρώτη φορά). Διάλεξε το είδος χειροκίνητα.'},
+mlFail:'Η αυτόματη αναγνώριση δεν δούλεψε (χρειάζεται σύνδεση την πρώτη φορά). Διάλεξε το είδος χειροκίνητα.',
+learnTitle:'Εκμάθηση',learnNote:'Κάθε φορά που επιβεβαιώνεις ή διορθώνεις ένα είδος ή ένα χρώμα, το θυμάμαι (μόνο στη συσκευή σου) και γίνομαι πιο σωστός στα επόμενα.',
+learnStats:(c,k,n,ok)=>`Θυμάμαι ${c} είδη και ${k} διορθώσεις χρώματος.`+(n?` Σωστή πρώτη πρόταση είδους: ${ok} από ${n}.`:''),
+learnReset:'Σβήσε ό,τι έμαθα',learnResetQ:'Θα σβηστούν όσα έχω μάθει από τις επιβεβαιώσεις σου. Οι φωτογραφίες και η ντουλάπα σου δεν επηρεάζονται. Συνέχεια;',
+learnedColor:'Το πρότεινα από όσα μου έχεις δείξει πριν.',learnedCat:'Βοήθησαν και όσα έχεις επιβεβαιώσει πριν.'},
 en:{title:'Closet Assistant',closet:'👗 Closet',suggest:'✨ Suggest',all:'All',clothes:'Clothes',shoesF:'Shoes',acc:'Accessories',
 cats:{top:'Top',bottom:'Bottom',dress:'Dress',jumpsuit:'Jumpsuit',outer:'Outerwear',shoes:'Shoes',bag:'Bag',belt:'Belt',hat:'Hat',sunglasses:'Sunglasses',scarf:'Scarf',winterscarf:'Winter scarf',gloves:'Gloves',watch:'Watch',necklace:'Necklace',earrings:'Earrings',bracelet:'Bracelet',ring:'Ring',tights:'Tights',jewelry:'Jewelry (other)'},
 empty:'Your closet is empty. Tap + to add your first item.',
@@ -165,7 +169,11 @@ mlNote:'Runs on your device and is free. The first time it downloads a model (ab
 mlConfirm:'This will download about 155 MB (once). Better on Wi-Fi. Continue?',
 mlWait:'Recognising the item…',mlDownloading:p=>`Downloading the model (${p}%). This only happens the first time.`,
 mlGuess:'I think it is:',mlMaybe:'Or maybe:',
-mlFail:'Automatic recognition did not work (it needs a connection the first time). Pick the type manually.'}
+mlFail:'Automatic recognition did not work (it needs a connection the first time). Pick the type manually.',
+learnTitle:'Learning',learnNote:'Every time you confirm or correct an item type or colour I remember it (on your device only) and get better at the next ones.',
+learnStats:(c,k,n,ok)=>`I remember ${c} items and ${k} colour corrections.`+(n?` First type guess correct: ${ok} of ${n}.`:''),
+learnReset:'Erase what I learned',learnResetQ:'This erases what I learned from your confirmations. Your photos and closet are not affected. Continue?',
+learnedColor:'Suggested based on what you showed me before.',learnedCat:'What you confirmed before also helped.'}
 };
 // id: [hex, hue, neutral, el, en]
 const P={
@@ -229,18 +237,19 @@ function cleanItem(o){
  if(Array.isArray(o.occ)){const occ=OCC.filter(x=>o.occ.includes(x));if(occ.length)it.occ=occ}
  return it}
 function exportData(){
- const blob=new Blob([JSON.stringify({app:'closet-assistant',v:2,items:S.items})],{type:'application/json'});
+ const blob=new Blob([JSON.stringify({app:'closet-assistant',v:2,items:S.items,learn:LEARN})],{type:'application/json'});
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
  a.download='closet-backup-'+new Date().toISOString().slice(0,10)+'.json';
  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
 async function importData(file){
- let items;
- try{const j=JSON.parse(await file.text());items=Array.isArray(j)?j:j.items;if(!Array.isArray(items))throw 0}
+ let items,jl=null;
+ try{const j=JSON.parse(await file.text());items=Array.isArray(j)?j:j.items;jl=Array.isArray(j)?null:j.learn;if(!Array.isArray(items))throw 0}
  catch(_){alert(T.importErr);return}
  const ok=items.map(cleanItem).filter(Boolean);
  if(!ok.length){alert(T.importErr);return}
  if(!confirm(T.confirmImport(ok.length)))return;
  for(const it of ok)await dbPut(it);
+ try{const lj=cleanLearn(jl);if(lj.cat.length||lj.col.length){LEARN.cat=[...LEARN.cat,...lj.cat].slice(-LEARN_MAX.cat);LEARN.col=[...LEARN.col,...lj.col].slice(-LEARN_MAX.col);LEARN.st={n:LEARN.st.n+lj.st.n,ok:LEARN.st.ok+lj.st.ok};saveLearn()}}catch(_){}
  await reload();S.outfits=null;render();alert(T.importOk(ok.length))}
 
 /* ---------- weather (Open-Meteo, no key) ---------- */
@@ -292,7 +301,7 @@ const PLAB=Object.fromEntries(Object.entries(P).map(([k,v])=>[k,lab(...hex2rgb(v
 function nearest(rgb){const l=lab(...rgb);let best=null,bd=1e9;
  for(const k in PLAB){const p=PLAB[k],d=(l[0]-p[0])**2+(l[1]-p[1])**2+(l[2]-p[2])**2;if(d<bd){bd=d;best=k}}return best}
 const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
-function detect(c){
+function detectFull(c){
  const N=64,t=document.createElement('canvas');t.width=t.height=N;
  const x=t.getContext('2d',{willReadFrequently:true});x.drawImage(c,0,0,N,N);
  const d=x.getImageData(0,0,N,N).data;
@@ -306,8 +315,9 @@ function detect(c){
  const B={};
  for(const p of use){const k=(p[0]>>5)<<6|(p[1]>>5)<<3|(p[2]>>5);const b=B[k]||(B[k]={n:0,s:[0,0,0]});b.n++;b.s[0]+=p[0];b.s[1]+=p[1];b.s[2]+=p[2]}
  let top=null;for(const k in B)if(!top||B[k].n>top.n)top=B[k];
- return nearest(top.s.map(v=>v/top.n));
+ const rgb=top.s.map(v=>v/top.n);return {id:nearest(rgb),lab:lab(...rgb)};
 }
+const detect=c=>detectFull(c).id;
 function loadImg(file){return new Promise((ok,no)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{URL.revokeObjectURL(u);ok(i)};i.onerror=no;i.src=u})}
 function shrink(img,max=480){const k=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
  const c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);
@@ -341,26 +351,79 @@ function mlProgress(e){
  const pct=tot>0&&fs.every(x=>x.total>0)?fs.reduce((a,x)=>a+x.loaded,0)/tot*100:fs.reduce((a,x)=>a+x.p,0)/fs.length;
  const r=Math.max(0,Math.min(100,Math.round(pct)));
  if(r!==ML.pct){ML.pct=r;if(draft&&(draft.phase==='confirmcat'||draft.phase==='photo'))sheet()}}
+const l2=a=>{const n=Math.hypot(...a)||1;return Array.from(a,x=>x/n)};
+const dotp=(a,b)=>{let s=0;for(let i=0;i<a.length;i++)s+=a[i]*b[i];return s};
+// Same CLIP model as before, but loaded as an image part and a text part so the image embedding can also be reused for learning.
 function mlLoad(){
  if(ML.p)return ML.p;
  ML.files={};ML.pct=0;ML.ready=false;
  ML.p=(async()=>{
-  const lib=await ML_IMPORT(ML_LIB);
-  const pipe=await lib.pipeline('zero-shot-image-classification',ML_MODEL,{quantized:true,progress_callback:mlProgress});
-  ML.ready=true;return pipe})().catch(e=>{ML.p=null;ML.ready=false;throw e});
+  const lib=await ML_IMPORT(ML_LIB),o=()=>({quantized:true,progress_callback:mlProgress}); // separate option objects: the library writes the model file name into them
+  const [proc,vm,tok,tm]=await Promise.all([lib.AutoProcessor.from_pretrained(ML_MODEL,{progress_callback:mlProgress}),
+   lib.CLIPVisionModelWithProjection.from_pretrained(ML_MODEL,o()),
+   lib.AutoTokenizer.from_pretrained(ML_MODEL,{progress_callback:mlProgress}),
+   lib.CLIPTextModelWithProjection.from_pretrained(ML_MODEL,o())]);
+  const cand=[],owner=[];
+  for(const c in LABELS)for(const l of LABELS[c]){cand.push('a photo of '+l);owner.push(c)}
+  const t=await tm(tok(cand,{padding:true,truncation:true})),D=t.text_embeds.dims[1];
+  const txt=cand.map((_,i)=>l2(t.text_embeds.data.slice(i*D,(i+1)*D)));
+  ML.ready=true;return {lib,proc,vm,txt,owner}})().catch(e=>{ML.p=null;ML.ready=false;throw e});
  return ML.p}
-// Returns up to 3 {cat,score} guesses (probabilities summed over each category's labels), or null if not confident.
+
+/* ---------- learning (on-device memory of the user's confirmations) ----------
+   Stored in localStorage key 'learn': no photos, only small numbers.
+   cat: [{e:[512 ints = image embedding*127], c:category}]  col: [{l:[L,a,b], c:colour}]  st: guess statistics */
+const LEARN_MAX={cat:300,col:200};
+const SIM_MIN=0.85; // an example only counts when it looks this similar (tuned on the 20 test photos, see notes)
+function cleanLearn(o){
+ const L={cat:[],col:[],st:{n:0,ok:0}};
+ if(!o||typeof o!=='object')return L;
+ for(const x of Array.isArray(o.cat)?o.cat:[])
+  if(x&&Array.isArray(x.e)&&x.e.length===512&&x.e.every(v=>Number.isInteger(v)&&v>=-127&&v<=127)&&own(I18N.el.cats,x.c))L.cat.push({e:x.e,c:x.c});
+ for(const x of Array.isArray(o.col)?o.col:[])
+  if(x&&Array.isArray(x.l)&&x.l.length===3&&x.l.every(Number.isFinite)&&own(P,x.c))L.col.push({l:x.l.map(v=>Math.round(v*10)/10),c:x.c});
+ if(o.st&&Number.isInteger(o.st.n)&&Number.isInteger(o.st.ok)&&o.st.n>=0&&o.st.ok>=0&&o.st.ok<=o.st.n)L.st={n:o.st.n,ok:o.st.ok};
+ L.cat=L.cat.slice(-LEARN_MAX.cat);L.col=L.col.slice(-LEARN_MAX.col);return L}
+function loadLearn(){try{return cleanLearn(JSON.parse(ls.get('learn')))}catch(e){return cleanLearn(null)}}
+let LEARN=loadLearn();
+const saveLearn=()=>ls.set('learn',JSON.stringify(LEARN));
+const q8=v=>v.map(x=>Math.max(-127,Math.min(127,Math.round(x*127))));
+const dq8=e=>l2(e.map(x=>x/127));
+function learnCat(emb,cat){
+ const e=q8(emb),v=dq8(e);
+ // a near-identical photo already remembered: replace it instead of piling up copies
+ LEARN.cat=LEARN.cat.filter(x=>!(dotp(dq8(x.e),v)>0.98&&x.c===cat));
+ LEARN.cat.push({e,c:cat});if(LEARN.cat.length>LEARN_MAX.cat)LEARN.cat.shift();saveLearn()}
+function learnColor(lab,col){
+ const l=lab.map(v=>Math.round(v*10)/10);
+ LEARN.col=LEARN.col.filter(x=>!(dist(x.l,l)<2&&x.c===col));
+ LEARN.col.push({l,c:col});if(LEARN.col.length>LEARN_MAX.col)LEARN.col.shift();saveLearn()}
+// Colour suggestion: the palette's nearest colour has a fixed weight, remembered corrections nearby add weight for their colour.
+function suggestColor(lab,auto){
+ const w={};w[auto]=0.6;let used=false;
+ for(const x of LEARN.col){const d=dist(x.l,lab);if(d<=10){w[x.c]=(w[x.c]||0)+1/(1+d/5);if(x.c!==auto)used=true}}
+ const best=Object.keys(w).sort((a,b)=>w[b]-w[a])[0];
+ return {id:best,learned:best!==auto&&used}}
+// Returns {ranked:[{cat,score}] (up to 3, or null if not confident), emb}.
 async function guessCat(dataUrl){
- const pipe=await mlLoad();
- const cats=Object.keys(LABELS).filter(c=>!(S.gender==='male'&&MALE_HIDE.includes(c)));
- const cand=[],owner={};
- for(const c of cats)for(const l of LABELS[c]){cand.push(l);owner[l]=c}
- const url=URL.createObjectURL(await (await fetch(dataUrl)).blob());
- let out;try{out=await pipe(url,cand)}finally{URL.revokeObjectURL(url)}
- const sum={};
- for(const o of out){const c=owner[o.label];if(c)sum[c]=(sum[c]||0)+o.score}
- const ranked=Object.entries(sum).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([cat,score])=>({cat,score}));
- return ranked.length&&ranked[0].score>=0.35?ranked:null}
+ const m=await mlLoad();
+ const cats=new Set(Object.keys(LABELS).filter(c=>!(S.gender==='male'&&MALE_HIDE.includes(c))));
+ const raw=await (await fetch(dataUrl)).blob(),url=URL.createObjectURL(raw);
+ let emb;try{const im=await m.lib.RawImage.read(url);emb=l2((await m.vm(await m.proc(im))).image_embeds.data)}finally{URL.revokeObjectURL(url)}
+ // zero-shot: softmax over the label prompts
+ const lg=m.txt.map((t,i)=>cats.has(m.owner[i])?100*dotp(emb,t):-1e9),mx=Math.max(...lg),ex=lg.map(x=>Math.exp(x-mx)),sm=ex.reduce((a,b)=>a+b);
+ const zs={};ex.forEach((x,i)=>{zs[m.owner[i]]=(zs[m.owner[i]]||0)+x/sm});
+ // learned: the most similar photos the user already confirmed vote, more weight the more alike they are
+ const nb=LEARN.cat.filter(x=>cats.has(x.c)).map(x=>({c:x.c,s:dotp(emb,dq8(x.e))})).filter(x=>x.s>=SIM_MIN).sort((a,b)=>b.s-a.s).slice(0,5);
+ const sc={...zs};let used=false;
+ if(nb.length){
+  const w=nb.map(x=>(x.s-SIM_MIN)/(1-SIM_MIN)+0.1),W=w.reduce((a,b)=>a+b,0),V={};
+  nb.forEach((x,i)=>V[x.c]=(V[x.c]||0)+w[i]/W);
+  const a=Math.min(0.4,W/(W+2)); // capped so a few remembered photos can never overrule a confident guess
+  for(const c of new Set([...Object.keys(zs),...Object.keys(V)]))sc[c]=(zs[c]||0)*(1-a)+(V[c]||0)*a;
+  used=Object.keys(sc).sort((a,b)=>sc[b]-sc[a])[0]!==Object.keys(zs).sort((a,b)=>zs[b]-zs[a])[0]}
+ const ranked=Object.entries(sc).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([cat,score])=>({cat,score}));
+ return {ranked:ranked.length&&ranked[0].score>=0.35?ranked:null,emb:Array.from(emb),used}}
 
 /* ---------- photo queue ---------- */
 /* duplicate detection: 64-bit difference hash of the photo + same category/colour check */
@@ -386,18 +449,20 @@ async function findDup(d){
   if(strong)return {it,strong:true};
   if(!best&&it.cat===d.cat&&it.color===d.color)best={it,strong:false}}
  return best}
-async function prepFile(f){const img=await loadImg(f),c=shrink(img);let h=null;try{h=dHash(c)}catch(_){}return {img:c.toDataURL('image/jpeg',.82),det:detect(c),h}}
+async function prepFile(f){const img=await loadImg(f),c=shrink(img);let h=null;try{h=dHash(c)}catch(_){}
+ const f2=detectFull(c),sg=suggestColor(f2.lab,f2.id);
+ return {img:c.toDataURL('image/jpeg',.82),det:sg.id,auto:f2.id,lab:f2.lab,lc:sg.learned,h}}
 function startGuess(){
  const d=draft;
  if(!S.ml){d.guess=null;return}
  d.guess='loading';
- guessCat(d.img).then(g=>{d.guess=g},()=>{d.guess=null;d.mlErr=true}).then(()=>{
+ guessCat(d.img).then(r=>{d.guess=r.ranked;d.emb=r.emb;d.lcat=r.used},()=>{d.guess=null;d.mlErr=true}).then(()=>{
   if(draft!==d)return;
   if(d.phase==='confirmcat'&&d.guess===null)d.phase='form';
   sheet()})}
 function showPrepared(p){
  qIndex++;
- draft={id:null,img:p.img,h:p.h,color:null,cat:null,season:'all',phase:'confirm',det:p.det,guess:null};
+ draft={id:null,img:p.img,h:p.h,color:null,cat:null,season:'all',phase:'confirm',det:p.det,auto:p.auto,lab:p.lab,lc:p.lc,guess:null};
  startGuess()}
 function advance(){
  if(queue.length)showPrepared(queue.shift());
@@ -557,6 +622,8 @@ function panelHtml(){
   `</div><div class="lbl">${T.theme}</div><div class="chips">`+
   ['auto','light','dark'].map(k=>chip(THEME===k,'settheme',k,T.themes[k])).join('')+
   `</div><div class="lbl">${T.mlName}</div><div class="chips">${chip(S.ml,'toggleml','',S.ml?T.on:T.off)}</div><div class="small">${T.mlNote}</div>
+  <div class="lbl">${T.learnTitle}</div><div class="small">${T.learnNote}</div><div class="small" style="margin-top:6px">${T.learnStats(LEARN.cat.length,LEARN.col.length,LEARN.st.n,LEARN.st.ok)}</div>
+  <div class="row"><button class="btn sec" data-act="resetlearn" ${LEARN.cat.length||LEARN.col.length||LEARN.st.n?'':'disabled'}>${T.learnReset}</button></div>
   <div class="row"><button class="btn sec" data-act="close">${T.close}</button></div>`}
 function draftHtml(){
  const d=draft;
@@ -574,7 +641,7 @@ function draftHtml(){
    if(S.ml&&ML.p&&!ML.ready)h+=`<div class="small">${T.mlDownloading(ML.pct)}</div>`;
    else if(!S.ml)h+=`<div class="small">${T.mlNote}</div>`}
  }else if(d.phase==='confirm'){
-  h+=`<div class="lbl">${T.detected}</div><div class="det"><i style="background:${P[d.det][0]}"></i><b>${cname(d.det)}</b></div><div class="lbl">${T.correct}</div>
+  h+=`<div class="lbl">${T.detected}</div><div class="det"><i style="background:${P[d.det][0]}"></i><b>${cname(d.det)}</b></div>${d.lc?`<div class="small">${T.learnedColor}</div>`:''}<div class="lbl">${T.correct}</div>
   <div class="row"><button class="btn" data-act="yes">${T.yes}</button><button class="btn sec" data-act="no">${T.no}</button></div>`;
   if(skip)h+=`<div class="row">${skip}</div>`;
  }else if(d.phase==='dup'&&d.dup){
@@ -586,7 +653,7 @@ function draftHtml(){
   if(g==='loading'){
    h+=`<div class="lbl">${T.mlWait}</div>`+(ML.p&&!ML.ready?`<div class="small">${T.mlDownloading(ML.pct)}</div>`:'')}
   else if(Array.isArray(g)){
-   h+=`<div class="lbl">${T.mlGuess}</div><div class="det"><span style="font-size:32px">${EMOJI[g[0].cat]}</span><b>${T.cats[g[0].cat]}</b></div><div class="lbl">${T.correct}</div>
+   h+=`<div class="lbl">${T.mlGuess}</div><div class="det"><span style="font-size:32px">${EMOJI[g[0].cat]}</span><b>${T.cats[g[0].cat]}</b></div>${d.lcat?`<div class="small">${T.learnedCat}</div>`:''}<div class="lbl">${T.correct}</div>
   <div class="row"><button class="btn" data-act="guessyes">${T.yes}</button><button class="btn sec" data-act="guessno">${T.no}</button></div>`;
    if(g.length>1)h+=`<div class="lbl">${T.mlMaybe}</div><div class="chips">`+g.slice(1).map(x=>chip(false,'pickguess',x.cat,`${EMOJI[x.cat]} ${T.cats[x.cat]}`)).join('')+`</div>`}
   if(skip)h+=`<div class="row">${skip}</div>`;
@@ -619,6 +686,11 @@ function sheet(){
 /* ---------- events ---------- */
 async function doSave(a){
   const isNew=!draft.id;
+  if(isNew){try{
+   if(draft.lab&&draft.color&&(draft.color!==draft.auto||draft.color!==draft.det))learnColor(draft.lab,draft.color);
+   if(draft.emb&&draft.cat)learnCat(draft.emb,draft.cat);
+   if(Array.isArray(draft.guess)&&draft.cat&&!draft.counted){LEARN.st.n++;if(draft.guess[0].cat===draft.cat)LEARN.st.ok++;draft.counted=true;saveLearn()}
+  }catch(_){}}
   const it={id:draft.id||Date.now()+'-'+Math.random().toString(36).slice(2,7),img:draft.img,color:draft.color,cat:draft.cat,
    season:draft.season||'all',occ:Array.isArray(draft.occ)&&draft.occ.length?draft.occ:occOf(draft),t:draft.t||Date.now()};
   await dbPut(it);await reload();S.outfits=null;
@@ -677,6 +749,7 @@ document.addEventListener('click',async e=>{
    if(!confirm(T.mlConfirm))return;
    S.ml=true;ls.set('ml','1');render();
    mlLoad().then(()=>render(),()=>{alert(T.mlFail);render()})}}
+ else if(a==='resetlearn'){if(confirm(T.learnResetQ)){LEARN=cleanLearn(null);ls.del('learn');render()}}
  else if(a==='color'){draft.color=v;sheet()}
  else if(a==='cat'){draft.cat=v;sheet()}
  else if(a==='season'){draft.season=v;sheet()}
