@@ -42,6 +42,7 @@ nav button.on{color:var(--acc);font-weight:700}
 .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
 .row>*{flex:1}
 .palette{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:6px}
+.palette.wide{grid-template-columns:repeat(6,1fr);gap:8px}
 .sw{aspect-ratio:1;border-radius:50%;border:3px solid transparent;box-shadow:0 0 0 1px var(--line);padding:0}
 .sw.on{border-color:var(--acc);box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--acc)}
 .lbl{font-size:14px;color:var(--mut);margin:10px 0 8px}
@@ -112,7 +113,7 @@ noMust:'Δεν βρέθηκε συνδυασμός με αυτό το κομμά
 geoB:'📍 Χρήση της τοποθεσίας μου',myLoc:'Η τοποθεσία μου',
 geoDenied:'Δεν δόθηκε άδεια τοποθεσίας. Μπορείς να αναζητήσεις πόλη.',
 geoUnavail:'Η τοποθεσία δεν είναι διαθέσιμη. Δοκίμασε αναζήτηση πόλης.',
-photoN:(k,n)=>`Φωτογραφία ${k} από ${n}`,skipB:'Παράλειψη',dupStrong:'Φαίνεται ότι αυτό το ρούχο υπάρχει ήδη στην ντουλάπα σου.',dupWeak:'Έχεις ήδη είδος με την ίδια κατηγορία και χρώμα.',dupAdd:'Προσθήκη ούτως ή άλλως',dupSkip:'Παράλειψη (δεν προστίθεται)',dupOld:'Υπάρχον',dupNew:'Νέο',saveMore:'Αποθήκευση και άλλο',processing:'Επεξεργασία φωτογραφιών…',
+photoN:(k,n)=>`Φωτογραφία ${k} από ${n}`,palName:'Προχωρημένη παλέτα',palMore:'Περισσότερες αποχρώσεις',palBasic:'Βασικά χρώματα',palNote:'Δίνει περισσότερες αποχρώσεις όταν διαλέγεις χρώμα. Η αυτόματη ανίχνευση δίνει πάντα βασικό χρώμα και μπορείς να το διορθώσεις.',skipB:'Παράλειψη',dupStrong:'Φαίνεται ότι αυτό το ρούχο υπάρχει ήδη στην ντουλάπα σου.',dupWeak:'Έχεις ήδη είδος με την ίδια κατηγορία και χρώμα.',dupAdd:'Προσθήκη ούτως ή άλλως',dupSkip:'Παράλειψη (δεν προστίθεται)',dupOld:'Υπάρχον',dupNew:'Νέο',saveMore:'Αποθήκευση και άλλο',processing:'Επεξεργασία φωτογραφιών…',
 mlName:'Αυτόματη αναγνώριση είδους',on:'Ενεργή',off:'Ανενεργή',
 mlNote:'Τρέχει στη συσκευή σου και είναι δωρεάν. Την πρώτη φορά κατεβάζει ένα μοντέλο (περίπου 155 MB) και μετά το κρατά. Οι φωτογραφίες δεν ανεβαίνουν πουθενά. Μπορεί να κάνει λάθη, οπότε ρωτά πάντα για επιβεβαίωση.',
 mlConfirm:'Θα κατεβάσει περίπου 155 MB (μία φορά). Καλύτερα με Wi-Fi. Συνέχεια;',
@@ -163,7 +164,7 @@ noMust:'No outfit found with this item. You also need the other basic pieces.',
 geoB:'📍 Use my location',myLoc:'My location',
 geoDenied:'Location permission was not granted. You can search for a city instead.',
 geoUnavail:'Location is not available. Try searching for a city.',
-photoN:(k,n)=>`Photo ${k} of ${n}`,skipB:'Skip',dupStrong:'This item looks like it is already in your closet.',dupWeak:'You already have an item with the same category and colour.',dupAdd:'Add anyway',dupSkip:'Skip (do not add)',dupOld:'Existing',dupNew:'New',saveMore:'Save and add another',processing:'Processing photos…',
+photoN:(k,n)=>`Photo ${k} of ${n}`,palName:'Advanced palette',palMore:'More shades',palBasic:'Basic colours',palNote:'Offers more shades when you pick a colour. Automatic detection always gives a basic colour and you can refine it.',skipB:'Skip',dupStrong:'This item looks like it is already in your closet.',dupWeak:'You already have an item with the same category and colour.',dupAdd:'Add anyway',dupSkip:'Skip (do not add)',dupOld:'Existing',dupNew:'New',saveMore:'Save and add another',processing:'Processing photos…',
 mlName:'Automatic item recognition',on:'On',off:'Off',
 mlNote:'Runs on your device and is free. The first time it downloads a model (about 155 MB) and then keeps it. Photos are never uploaded. It can make mistakes, so it always asks you to confirm.',
 mlConfirm:'This will download about 155 MB (once). Better on Wi-Fi. Continue?',
@@ -183,6 +184,30 @@ blue:['#4b86d6',212,0,'Μπλε','Blue'],teal:['#1a9aa5',185,0,'Τιρκουάζ
 yellow:['#f2cf3a',50,0,'Κίτρινο','Yellow'],orange:['#ee8a24',28,0,'Πορτοκαλί','Orange'],red:['#d02a2a',0,0,'Κόκκινο','Red'],
 burgundy:['#7a1f3d',345,0,'Μπορντό','Burgundy'],pink:['#f08fb4',337,0,'Ροζ','Pink'],purple:['#7f55c4',270,0,'Μωβ','Purple']
 };
+const BASE=Object.keys(P);
+// Extended palette for the advanced mode. id: [hex, hue, el, en, family].
+// Every shade belongs to one of the basic colours above: the outfit engine reasons about families,
+// so adding shades never changes how combinations are judged.
+const PX={
+ charcoal:['#3a3a3c',0,'Ανθρακί','Charcoal','black'],
+ offwhite:['#efe9dd',40,'Εκρού','Off-white','white'],cream:['#f7eccd',45,'Κρεμ','Cream','white'],
+ lightgrey:['#cfcfcf',0,'Ανοιχτό γκρι','Light grey','grey'],darkgrey:['#5c5c5c',0,'Σκούρο γκρι','Dark grey','grey'],silver:['#c9ccd1',210,'Ασημί','Silver','grey'],
+ taupe:['#9a8878',25,'Τόπε','Taupe','beige'],camel:['#c19a6b',33,'Κάμελ','Camel','beige'],
+ chocolate:['#4a2e1e',20,'Σοκολατί','Chocolate','brown'],
+ lightblue:['#a8cdf0',208,'Γαλάζιο','Light blue','blue'],royal:['#2a4fc4',227,'Έντονο μπλε','Royal blue','blue'],denim:['#3f5d8a',215,'Τζιν','Denim','blue'],
+ mint:['#9fe0c4',155,'Μέντα','Mint','teal'],petrol:['#10646e',188,'Πετρόλ','Petrol','teal'],
+ olive:['#6b6b35',60,'Λαδί','Olive','green'],khaki:['#8a8b5c',62,'Χακί','Khaki','green'],darkgreen:['#1f4d2e',145,'Κυπαρισσί','Dark green','green'],lightgreen:['#a8d08d',95,'Ανοιχτό πράσινο','Light green','green'],
+ mustard:['#c9a227',45,'Μουσταρδί','Mustard','yellow'],gold:['#bfa14a',45,'Χρυσό','Gold','yellow'],
+ peach:['#f7c19b',25,'Ροδακινί','Peach','orange'],rust:['#9c4a21',20,'Κανελί','Rust','orange'],coral:['#f2705f',8,'Κοραλί','Coral','orange'],
+ brick:['#a53a2a',10,'Κεραμιδί','Brick','red'],
+ maroon:['#5c1a28',345,'Βυσσινί','Maroon','burgundy'],
+ lightpink:['#f8cfe0',335,'Ανοιχτό ροζ','Light pink','pink'],fuchsia:['#d6248f',322,'Φούξια','Fuchsia','pink'],dustyrose:['#c08a90',352,'Παλ ροζ','Dusty rose','pink'],
+ lilac:['#c3a8e8',268,'Λιλά','Lilac','purple'],plum:['#6b3b6e',295,'Δαμασκηνί','Plum','purple'],indigo:['#4b3a8c',252,'Ινδικό','Indigo','purple']
+};
+const FAM={};
+for(const k in PX){const v=PX[k];FAM[k]=v[4];P[k]=[v[0],v[1],P[v[4]][2],v[2],v[3]]}
+const fam=id=>FAM[id]||id;
+const PAL_ALL=BASE.flatMap(b=>[b,...Object.keys(PX).filter(k=>FAM[k]===b)]);
 const EMOJI={top:'👚',bottom:'👖',dress:'👗',jumpsuit:'🥻',outer:'🧥',shoes:'👟',bag:'👜',belt:'➰',hat:'👒',sunglasses:'🕶️',scarf:'🎀',winterscarf:'🧣',gloves:'🧤',watch:'⌚',necklace:'📿',earrings:'💎',bracelet:'🔗',ring:'💍',tights:'🧦',jewelry:'💍'};
 // 'jewelry' is a legacy category kept so items saved earlier still work; it is not offered in the picker.
 const CLOTHES=['top','bottom','dress','jumpsuit','outer'];
@@ -203,7 +228,7 @@ let T=I18N[LANG];
 function loadLoc(){try{const o=JSON.parse(ls.get('loc'));if(o&&typeof o.name==='string'&&Number.isFinite(o.lat)&&Number.isFinite(o.lon))return {name:o.name,lat:o.lat,lon:o.lon,mine:o.mine===true}}catch(e){}return null}
 const S={tab:'closet',filter:'all',items:[],outer:false,outfits:null,msg:'',menu:false,
  gender:['female','male','other'].includes(ls.get('gender'))?ls.get('gender'):null,
- occ:'casual',must:null,mood:'',ml:ls.get('ml')==='1',loc:loadLoc(),editLoc:false,q:'',geo:[],geoMsg:'',geoBusy:false,day:0,wxAll:null,wxErr:'',wxT:0};
+ occ:'casual',must:null,mood:'',ml:ls.get('ml')==='1',pal:ls.get('pal')==='1',loc:loadLoc(),editLoc:false,q:'',geo:[],geoMsg:'',geoBusy:false,day:0,wxAll:null,wxErr:'',wxT:0};
 let draft=null,panel=null;
 let queue=[],qTotal=0,qIndex=0; // photos picked together are reviewed one after another
 const $=s=>document.querySelector(s);
@@ -297,7 +322,7 @@ function lab(r,g,b){[r,g,b]=[r,g,b].map(v=>{v/=255;return v>.04045?Math.pow((v+.
  const x=(r*.4124+g*.3576+b*.1805)/.95047,y=r*.2126+g*.7152+b*.0722,z=(r*.0193+g*.1192+b*.9505)/1.08883;
  const f=t=>t>.008856?Math.cbrt(t):7.787*t+16/116;
  return [116*f(y)-16,500*(f(x)-f(y)),200*(f(y)-f(z))]}
-const PLAB=Object.fromEntries(Object.entries(P).map(([k,v])=>[k,lab(...hex2rgb(v[0]))]));
+const PLAB=Object.fromEntries(BASE.map(k=>[k,lab(...hex2rgb(P[k][0]))])); // automatic detection only ever returns a basic colour
 function nearest(rgb){const l=lab(...rgb);let best=null,bd=1e9;
  for(const k in PLAB){const p=PLAB[k],d=(l[0]-p[0])**2+(l[1]-p[1])**2+(l[2]-p[2])**2;if(d<bd){bd=d;best=k}}return best}
 const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
@@ -447,7 +472,7 @@ async function findDup(d){
   let strong=false;
   if(d.h&&it.img){const h=await hashOfItem(it);if(h&&ham(h,d.h)<=8)strong=true}
   if(strong)return {it,strong:true};
-  if(!best&&it.cat===d.cat&&it.color===d.color)best={it,strong:false}}
+  if(!best&&it.cat===d.cat&&fam(it.color)===fam(d.color))best={it,strong:false}}
  return best}
 async function prepFile(f){const img=await loadImg(f),c=shrink(img);let h=null;try{h=dHash(c)}catch(_){}
  const f2=detectFull(c),sg=suggestColor(f2.lab,f2.id);
@@ -472,9 +497,9 @@ const afterColor=()=>{draft.phase=S.ml&&draft.guess!==null?'confirmcat':'form'};
 
 /* ---------- outfit logic ---------- */
 const hueDiff=(a,b)=>{const d=Math.abs(a-b)%360;return d>180?360-d:d};
-function chromaIds(list){return [...new Set(list.map(i=>i.color).filter(c=>!P[c][2]))]}
+function chromaIds(list){return [...new Set(list.map(i=>fam(i.color)).filter(c=>!P[c][2]))]}
 function cs(list){
- const ids=chromaIds(list),all=new Set(list.map(i=>i.color));let s=0;
+ const ids=chromaIds(list),all=new Set(list.map(i=>fam(i.color)));let s=0;
  if(ids.length>2)s-=3*(ids.length-2);
  for(let a=0;a<ids.length;a++)for(let b=a+1;b<ids.length;b++){
   const d=hueDiff(P[ids[a]][1],P[ids[b]][1]);
@@ -621,7 +646,8 @@ function panelHtml(){
   [['el','Ελληνικά'],['en','English']].map(([k,n])=>chip(LANG===k,'setlang',k,n)).join('')+
   `</div><div class="lbl">${T.theme}</div><div class="chips">`+
   ['auto','light','dark'].map(k=>chip(THEME===k,'settheme',k,T.themes[k])).join('')+
-  `</div><div class="lbl">${T.mlName}</div><div class="chips">${chip(S.ml,'toggleml','',S.ml?T.on:T.off)}</div><div class="small">${T.mlNote}</div>
+  `</div><div class="lbl">${T.palName}</div><div class="chips">${chip(S.pal,'togglepal','',S.pal?T.on:T.off)}</div><div class="small">${T.palNote}</div>
+  <div class="lbl">${T.mlName}</div><div class="chips">${chip(S.ml,'toggleml','',S.ml?T.on:T.off)}</div><div class="small">${T.mlNote}</div>
   <div class="lbl">${T.learnTitle}</div><div class="small">${T.learnNote}</div><div class="small" style="margin-top:6px">${T.learnStats(LEARN.cat.length,LEARN.col.length,LEARN.st.n,LEARN.st.ok)}</div>
   <div class="row"><button class="btn sec" data-act="resetlearn" ${LEARN.cat.length||LEARN.col.length||LEARN.st.n?'':'disabled'}>${T.learnReset}</button></div>
   <div class="row"><button class="btn sec" data-act="close">${T.close}</button></div>`}
@@ -659,8 +685,10 @@ function draftHtml(){
   if(skip)h+=`<div class="row">${skip}</div>`;
  }else{
   if(d.mlErr)h+=`<div class="small" style="margin-bottom:6px">${T.mlFail}</div>`;
-  h+=`<div class="lbl">${T.pickColor}${d.color?': <b>'+cname(d.color)+'</b>':''}</div><div class="palette">`+
-   Object.keys(P).map(k=>`<button class="sw ${d.color===k?'on':''}" style="background:${P[k][0]}" data-act="color" data-v="${k}" aria-label="${esc(cname(k))}"></button>`).join('')+`</div>`;
+  const wide=S.pal||(d.color&&own(PX,d.color));
+  h+=`<div class="lbl">${T.pickColor}${d.color?': <b>'+cname(d.color)+'</b>':''}</div><div class="palette${wide?' wide':''}">`+
+   (wide?PAL_ALL:BASE).map(k=>`<button class="sw ${d.color===k?'on':''}" style="background:${P[k][0]}" data-act="color" data-v="${k}" aria-label="${esc(cname(k))}" title="${esc(cname(k))}"></button>`).join('')+`</div>`+
+   `<div class="chips" style="padding:0 0 4px">${chip(S.pal,'togglepal','',S.pal?T.palBasic:T.palMore)}</div>`;
   h+=`<div class="lbl">${T.pickCat}</div>`+Object.keys(PICK).map(g=>{
    let ks=PICK[g].filter(k=>!(S.gender==='male'&&MALE_HIDE.includes(k)&&d.cat!==k));
    if(g==='acc'&&d.cat==='jewelry')ks=[...ks,'jewelry'];
@@ -743,6 +771,7 @@ document.addEventListener('click',async e=>{
  else if(a==='guessno'){draft.phase='form';sheet()}
  else if(a==='pickguess'){draft.cat=v;draft.phase='form';sheet()}
  else if(a==='skip'){advance()}
+ else if(a==='togglepal'){S.pal=!S.pal;ls.set('pal',S.pal?'1':'0');if(draft||panel)sheet();else render()}
  else if(a==='toggleml'){
   if(S.ml){S.ml=false;ls.set('ml','0');render()}
   else{
