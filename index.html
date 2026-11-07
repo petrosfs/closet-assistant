@@ -95,6 +95,8 @@ wearToday:'Το φόρεσα σήμερα',woreIt:'👕 Το φόρεσα σήμ
 favSave:'Αγαπημένο',favTitle:'♥ Αγαπημένοι συνδυασμοί',favDel:'Αφαίρεση',
 diaryEmpty:'Δεν έχεις καταγράψει ακόμη τι φόρεσες. Πάτα «Το φόρεσα σήμερα» σε έναν συνδυασμό ή σε ένα είδος της ντουλάπας.',
 undoDay:'Αφαίρεση ημέρας',undoDayQ:'Να αφαιρεθεί αυτή η ημέρα από το ημερολόγιο;',
+rateHint:'Το 👍 και το 👎 διδάσκουν τις επόμενες προτάσεις. Ένα δεύτερο πάτημα το αναιρεί.',
+planBtn:'📌 Προγραμμάτισε',planTitle:'Προγραμματισμένα ντυσίματα',planWhen:'Για ποια μέρα;',planNote:'Ένας συνδυασμός ανά μέρα. Αν υπάρχει ήδη, αντικαθίσταται.',planOk:d=>`Προγραμματίστηκε για ${d}. Θα το βρεις στο Ημερολόγιο.`,planDel:'Αφαίρεση',planTodayMsg:'📌 Έχεις προγραμματίσει συνδυασμό για σήμερα. Θα τον βρεις στο Ημερολόγιο.',
 wornN:(n,d)=>`Φορέθηκε ${n} ${n===1?'φορά':'φορές'} · τελευταία: ${d}`,wornNever:'Δεν το έχεις καταγράψει ακόμη ως φορεμένο.',
 priceQ:'Τιμή αγοράς σε € (προαιρετικά)',
 statsM:'📊 Στατιστικά',statsNote:'Βασίζονται σε ό,τι έχεις καταγράψει στο ημερολόγιο («Το φόρεσα σήμερα»). Όσο περισσότερο το καταγράφεις, τόσο πιο αληθινά είναι.',
@@ -151,7 +153,7 @@ mlGuess:'Ανίχνευσα:',mlMaybe:'Ή μήπως:',
 mlFail:'Η αυτόματη αναγνώριση δεν δούλεψε (χρειάζεται σύνδεση την πρώτη φορά). Διάλεξε το είδος χειροκίνητα.',
 learnTitle:'Εκμάθηση',learnNote:'Κάθε φορά που επιβεβαιώνεις ή διορθώνεις ένα είδος ή ένα χρώμα, το θυμάμαι (μόνο στη συσκευή σου) και γίνομαι πιο σωστός στα επόμενα.',
 learnStats:(c,k,n,ok)=>`Θυμάμαι ${c} είδη και ${k} διορθώσεις χρώματος.`+(n?` Σωστή πρώτη πρόταση είδους: ${ok} από ${n}.`:''),
-learnReset:'Σβήσε ό,τι έμαθα',learnResetQ:'Θα σβηστούν όσα έχω μάθει από τις επιβεβαιώσεις σου. Οι φωτογραφίες και η ντουλάπα σου δεν επηρεάζονται. Συνέχεια;',
+learnReset:'Σβήσε ό,τι έμαθα',learnResetQ:'Θα σβηστούν όσα έχω μάθει από τις επιβεβαιώσεις και τις βαθμολογίες σου. Οι φωτογραφίες και η ντουλάπα σου δεν επηρεάζονται. Συνέχεια;',
 learnedColor:'Το πρότεινα από όσα μου έχεις δείξει πριν.',learnedCat:'Βοήθησαν και όσα έχεις επιβεβαιώσει πριν.',
 back:'Πίσω',subQ:'Τι είδος παπουτσιού;',subs:{athletic:'Αθλητικά',sneakers:'Sneakers',boots:'Μπότες',ankle:'Μποτάκια',heels:'Τακούνια',platform:'Πλατφόρμες',flats:'Μπαλαρίνες / Flats',sandals:'Σανδάλια / Σαγιονάρες',loafers:'Loafers / Μοκασίνια'},mlHint:'Υπάρχει αυτόματη αναγνώριση είδους: ενεργοποίησέ την από το μενού ☰ → Ρυθμίσεις.',mlNone:'Δεν είμαι σίγουρος για το είδος. Διάλεξέ το εσύ και θα το θυμάμαι.'},
 en:{title:'Closet Assistant',closet:'👗 Closet',suggest:'✨ Suggest',all:'All',clothes:'Clothes',shoesF:'Shoes',acc:'Accessories',
@@ -165,6 +167,8 @@ wearToday:'I wore this today',woreIt:'👕 I wore this today',woreOk:'Saved to y
 favSave:'Favourite',favTitle:'♥ Favourite outfits',favDel:'Remove',
 diaryEmpty:'Nothing logged yet. Tap “I wore this today” on an outfit or on an item in your closet.',
 undoDay:'Remove day',undoDayQ:'Remove this day from the diary?',
+rateHint:'👍 and 👎 teach the next suggestions. Tap again to undo.',
+planBtn:'📌 Plan it',planTitle:'Planned outfits',planWhen:'For which day?',planNote:'One outfit per day. An existing one is replaced.',planOk:d=>`Planned for ${d}. You will find it in the Diary.`,planDel:'Remove',planTodayMsg:'📌 You have an outfit planned for today. You will find it in the Diary.',
 wornN:(n,d)=>`Worn ${n} ${n===1?'time':'times'} · last: ${d}`,wornNever:'Not logged as worn yet.',
 priceQ:'Purchase price in € (optional)',
 statsM:'📊 Statistics',statsNote:'Based on what you logged in the diary (“I wore this today”). The more you log, the more accurate it gets.',
@@ -221,7 +225,7 @@ mlGuess:'I think it is:',mlMaybe:'Or maybe:',
 mlFail:'Automatic recognition did not work (it needs a connection the first time). Pick the type manually.',
 learnTitle:'Learning',learnNote:'Every time you confirm or correct an item type or colour I remember it (on your device only) and get better at the next ones.',
 learnStats:(c,k,n,ok)=>`I remember ${c} items and ${k} colour corrections.`+(n?` First type guess correct: ${ok} of ${n}.`:''),
-learnReset:'Erase what I learned',learnResetQ:'This erases what I learned from your confirmations. Your photos and closet are not affected. Continue?',
+learnReset:'Erase what I learned',learnResetQ:'This erases what I learned from your confirmations and ratings. Your photos and closet are not affected. Continue?',
 learnedColor:'Suggested based on what you showed me before.',learnedCat:'What you confirmed before also helped.',
 back:'Back',subQ:'What kind of shoes?',subs:{athletic:'Athletic shoes',sneakers:'Sneakers',boots:'Boots',ankle:'Ankle boots',heels:'Heels',platform:'Platforms',flats:'Ballet flats / Flats',sandals:'Sandals / Flip-flops',loafers:'Loafers / Moccasins'},mlHint:'Automatic item recognition is available: turn it on from the ☰ menu → Settings.',mlNone:'I am not sure about the type. Pick it and I will remember it.'}
 };
@@ -298,6 +302,35 @@ let FAV=(()=>{try{return cleanFav(JSON.parse(ls.get('fav')))}catch(e){return []}
 const saveFav=()=>ls.set('fav',JSON.stringify(FAV));
 const favKey=list=>list.map(i=>i.id).sort().join('+');
 const isFav=list=>FAV.some(f=>[...f.ids].sort().join('+')===favKey(list));
+/* ---------- outfit ratings and planned outfits (this device only) ---------- */
+const idOk=x=>typeof x==='string'&&/^[\w.-]{1,64}$/.test(x);
+const dayStr=dt=>dt.getFullYear()+'-'+pad2(dt.getMonth()+1)+'-'+pad2(dt.getDate());
+function cleanRate(a){const m=new Map();
+ for(const r of Array.isArray(a)?a:[]){
+  const ids=r&&Array.isArray(r.ids)?[...new Set(r.ids.filter(idOk))].slice(0,12):[];
+  if(ids.length>=2&&(r.v===1||r.v===-1))m.set([...ids].sort().join('+'),{ids,v:r.v})}
+ return [...m.values()].slice(-120)}
+let RATE=(()=>{try{return cleanRate(JSON.parse(ls.get('rate')))}catch(e){return []}})();
+const saveRate=()=>ls.set('rate',JSON.stringify(RATE));
+const rateOf=list=>{const k=favKey(list),r=RATE.find(x=>[...x.ids].sort().join('+')===k);return r?r.v:0};
+function setRate(list,v){const k=favKey(list),had=rateOf(list);
+ RATE=RATE.filter(x=>[...x.ids].sort().join('+')!==k);
+ if(had!==v)RATE.push({ids:list.map(i=>i.id),v});
+ RATE=cleanRate(RATE);saveRate()}
+// A rated outfit counts in proportion to how much of it a new combination shares (at least two pieces).
+function rateScore(list){
+ if(!RATE.length)return 0;
+ const have=new Set(list.map(i=>i.id));let s=0;
+ for(const r of RATE){let n=0;for(const id of r.ids)if(have.has(id))n++;
+  if(n>=2){const f=n/r.ids.length;s+=r.v*2.5*f*f}}
+ return Math.max(-4,Math.min(4,s))}
+function cleanPlan(a){const m=new Map();
+ for(const p of Array.isArray(a)?a:[]){
+  const ids=p&&Array.isArray(p.ids)?[...new Set(p.ids.filter(idOk))].slice(0,12):[];
+  if(ids.length>=2&&typeof p.d==='string'&&DATE_RE.test(p.d))m.set(p.d,{d:p.d,ids})}
+ return [...m.values()].sort((a,b)=>a.d<b.d?-1:1).slice(-90)}
+let PLAN=(()=>{try{return cleanPlan(JSON.parse(ls.get('plan'))).filter(p=>p.d>=today())}catch(e){return []}})();
+const savePlan=()=>ls.set('plan',JSON.stringify(PLAN));
 function loadLoc(){try{const o=JSON.parse(ls.get('loc'));if(o&&typeof o.name==='string'&&Number.isFinite(o.lat)&&Number.isFinite(o.lon))return {name:o.name,lat:o.lat,lon:o.lon,mine:o.mine===true}}catch(e){}return null}
 const S={tab:'closet',filter:'all',items:[],outer:false,outfits:null,msg:'',menu:false,
  gender:['female','male','other'].includes(ls.get('gender'))?ls.get('gender'):null,
@@ -341,13 +374,13 @@ function cleanItem(o){
  if(it.cat==='shoes'&&SUBS.includes(o.sub))it.sub=o.sub;
  return it}
 function exportData(){
- const blob=new Blob([JSON.stringify({app:'closet-assistant',v:2,items:S.items,learn:LEARN,fav:FAV})],{type:'application/json'});
+ const blob=new Blob([JSON.stringify({app:'closet-assistant',v:2,items:S.items,learn:LEARN,fav:FAV,rate:RATE,plan:PLAN})],{type:'application/json'});
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
  a.download='closet-backup-'+new Date().toISOString().slice(0,10)+'.json';
  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
 async function importData(file){
- let items,jl=null,jf=[];
- try{const j=JSON.parse(await file.text());items=Array.isArray(j)?j:j.items;jl=Array.isArray(j)?null:j.learn;jf=Array.isArray(j)?[]:cleanFav(j.fav);if(!Array.isArray(items))throw 0}
+ let items,jl=null,jf=[],jr=[],jpl=[];
+ try{const j=JSON.parse(await file.text());items=Array.isArray(j)?j:j.items;jl=Array.isArray(j)?null:j.learn;jf=Array.isArray(j)?[]:cleanFav(j.fav);jr=Array.isArray(j)?[]:cleanRate(j.rate);jpl=Array.isArray(j)?[]:cleanPlan(j.plan);if(!Array.isArray(items))throw 0}
  catch(_){alert(T.importErr);return}
  const ok=items.map(cleanItem).filter(Boolean);
  if(!ok.length){alert(T.importErr);return}
@@ -355,6 +388,7 @@ async function importData(file){
  for(const it of ok)await dbPut(it);
  try{const lj=cleanLearn(jl);if(lj.cat.length||lj.col.length){LEARN.cat=[...LEARN.cat,...lj.cat].slice(-LEARN_MAX.cat);LEARN.col=[...LEARN.col,...lj.col].slice(-LEARN_MAX.col);LEARN.st={n:LEARN.st.n+lj.st.n,ok:LEARN.st.ok+lj.st.ok};saveLearn()}}catch(_){}
  try{FAV=cleanFav([...FAV,...jf]);saveFav()}catch(_){}
+ try{RATE=cleanRate([...RATE,...jr]);saveRate();PLAN=cleanPlan([...PLAN,...jpl]).filter(p=>p.d>=today());savePlan()}catch(_){}
  await reload();S.outfits=null;render();alert(T.importOk(ok.length))}
 
 /* ---------- weather (Open-Meteo, no key) ---------- */
@@ -617,7 +651,7 @@ function patScore(list){
 function wornPenalty(list){let p=0;
  for(const i of list){const w=lastWorn(i);if(!w)continue;const d=daysAgo(w);if(d<=0)p-=2;else if(d===1)p-=1.2;else if(d===2)p-=.5}
  return p}
-const fit=list=>cs(list)+patScore(list)+wornPenalty(list);
+const fit=list=>cs(list)+patScore(list)+wornPenalty(list)+rateScore(list);
 function reasonOf(list){
  const ids=chromaIds(list);
  if(list.filter(busy).length===1)return 'patMix';
@@ -709,12 +743,21 @@ async function undoDay(day){
  for(const it of S.items)if(Array.isArray(it.w)&&it.w.includes(day)){
   const w=it.w.filter(x=>x!==day),n={...it};if(w.length)n.w=w;else delete n.w;await dbPut(n)}
  await reload()}
+function plannedHtml(){
+ const t=today();
+ const pl=PLAN.filter(p=>p.d>=t).map(p=>({p,items:p.ids.map(id=>S.items.find(i=>i.id===id)).filter(Boolean)})).filter(x=>x.items.length);
+ if(!pl.length)return '';
+ return `<div class="pad"><div class="lbl">${T.planTitle}</div></div>`+pl.map(x=>`<div class="outfit"><small>${esc(fmtDate(x.p.d))}${x.p.d===t?' · '+T.today:''}</small><div class="pieces">`+
+  x.items.map(i=>`<div class="piece">${tile(i)}${T.cats[i.cat]}<span>${cname(i.color)}</span></div>`).join('')+`</div><div class="row" style="margin-top:8px">`+
+  (x.p.d===t?`<button class="btn sec" data-act="woreplan" data-v="${x.p.d}">${T.woreIt}</button>`:'')+
+  `<button class="btn sec" data-act="plandel" data-v="${x.p.d}">${T.planDel}</button></div></div>`).join('')}
 function diaryView(){
+ const pl=plannedHtml();
  const by={};
  for(const it of S.items)for(const d of Array.isArray(it.w)?it.w:[])(by[d]||(by[d]=[])).push(it);
  const days=Object.keys(by).sort().reverse().slice(0,60);
- if(!days.length)return `<div class="empty">${T.diaryEmpty}</div>`;
- return days.map(d=>`<div class="dayh">${esc(fmtDate(d))}<button class="lnk" data-act="undoday" data-v="${d}">${T.undoDay}</button></div><div class="dayrow">`+
+ if(!days.length)return pl||`<div class="empty">${T.diaryEmpty}</div>`;
+ return pl+days.map(d=>`<div class="dayh">${esc(fmtDate(d))}<button class="lnk" data-act="undoday" data-v="${d}">${T.undoDay}</button></div><div class="dayrow">`+
   by[d].map(i=>tile(i,'button',`data-act="item" data-v="${i.id}"`)).join('')+`</div>`).join('')+'<div style="height:24px"></div>'}
 
 /* ---------- statistics ---------- */
@@ -853,15 +896,17 @@ function suggestView(){
  }
  h+=`</div>`;
  if(!S.gender)h+=`<div class="pad small">${T.genderHint}</div>`;
+ if(PLAN.some(p=>p.d===today()))h+=`<div class="pad small">${T.planTodayMsg}</div>`;
  h+=`<div class="pad"><button class="btn" data-act="go">${S.outfits?T.again:T.go}</button></div>`;
  if(S.msg)h+=`<div class="pad" style="color:var(--mut)">${S.msg}</div>`;
  if(S.outfits)h+=S.outfits.map((o,k)=>`<div class="outfit"><small>${T.reasons[o.reason]}</small><div class="pieces">`+
   [...o.main,...o.acc].map(i=>`<div class="piece">${tile(i)}${T.cats[i.cat]}<span>${cname(i.color)}${busy(i)?' · '+T.pats[patOf(i)]:''}</span></div>`).join('')+`</div>
-  <div class="row" style="margin-top:8px"><button class="btn sec" data-act="wore" data-v="${k}">${T.woreIt}</button><button class="btn sec" data-act="favsave" data-v="${k}">${isFav([...o.main,...o.acc])?'♥':'♡'} ${T.favSave}</button></div></div>`).join('');
+  <div class="row" style="margin-top:8px"><button class="btn sec" data-act="wore" data-v="${k}">${T.woreIt}</button><button class="btn sec" data-act="favsave" data-v="${k}">${isFav([...o.main,...o.acc])?'♥':'♡'} ${T.favSave}</button></div>
+  <div class="chips" style="padding:8px 0 0"><button class="chip ${rateOf([...o.main,...o.acc])===1?'on':''}" data-act="rate" data-v="${k}" data-r="1" aria-label="👍">👍</button><button class="chip ${rateOf([...o.main,...o.acc])===-1?'on':''}" data-act="rate" data-v="${k}" data-r="-1" aria-label="👎">👎</button><button class="chip" data-act="planopen" data-v="o${k}">${T.planBtn}</button></div></div>`).join('')+(S.outfits.length?`<div class="pad small">${T.rateHint}</div>`:'');
  const fl=FAV.map((f,idx)=>({idx,items:f.ids.map(id=>S.items.find(i=>i.id===id)).filter(Boolean),n:f.ids.length})).filter(x=>x.items.length===x.n);
  if(fl.length)h+=`<div class="pad"><div class="lbl">${T.favTitle}</div></div>`+fl.map(x=>`<div class="outfit"><div class="pieces">`+
   x.items.map(i=>`<div class="piece">${tile(i)}${T.cats[i.cat]}<span>${cname(i.color)}</span></div>`).join('')+`</div>
-  <div class="row" style="margin-top:8px"><button class="btn sec" data-act="wofav" data-v="${x.idx}">${T.woreIt}</button><button class="btn sec" data-act="favdel" data-v="${x.idx}">${T.favDel}</button></div></div>`).join('');
+  <div class="row" style="margin-top:8px"><button class="btn sec" data-act="wofav" data-v="${x.idx}">${T.woreIt}</button><button class="btn sec" data-act="favdel" data-v="${x.idx}">${T.favDel}</button><button class="btn sec" data-act="planopen" data-v="f${x.idx}">${T.planBtn}</button></div></div>`).join('');
  return h}
 function render(){
  document.documentElement.lang=LANG;T=I18N[LANG];applyTheme();
@@ -883,6 +928,7 @@ function panelHtml(){
  if(panel==='pickitem')return `<h2>${T.mustQ}</h2>`+(S.items.length?`<div class="grid" style="padding:0 0 12px">`+
   S.items.map(i=>tile(i,'button',`data-act="pickmust" data-v="${i.id}"`)).join('')+`</div>`:`<div class="empty">${T.empty}</div>`)+
   `<div class="row"><button class="btn sec" data-act="close">${T.cancel}</button></div>`;
+ if(panel==='plan')return `<h2>📌 ${T.planTitle}</h2><div class="lbl">${T.planWhen}</div><input type="date" class="inp" data-pd min="${today()}" value="${esc(S.planD||today())}" style="width:100%"><div class="row"><button class="btn" data-act="plansave">${T.save}</button><button class="btn sec" data-act="close">${T.cancel}</button></div><div class="small" style="margin-top:10px">${T.planNote}</div>`;
  if(panel==='stats')return statsHtml();
  if(panel==='pack')return packHtml();
  if(panel==='profile')return `<h2>👤 ${T.profile}</h2><div class="lbl">${T.gender}</div><div class="chips">`+
@@ -895,7 +941,7 @@ function panelHtml(){
   `</div><div class="lbl">${T.palName}</div><div class="chips">${chip(S.pal,'togglepal','',S.pal?T.on:T.off)}</div><div class="small">${T.palNote}</div>
   <div class="lbl">${T.mlName}</div><div class="chips">${chip(S.ml,'toggleml','',S.ml?T.on:T.off)}</div><div class="small">${T.mlNote}</div>
   <div class="lbl">${T.learnTitle}</div><div class="small">${T.learnNote}</div><div class="small" style="margin-top:6px">${T.learnStats(LEARN.cat.length,LEARN.col.length,LEARN.st.n,LEARN.st.ok)}</div>
-  <div class="row"><button class="btn sec" data-act="resetlearn" ${LEARN.cat.length||LEARN.col.length||LEARN.st.n?'':'disabled'}>${T.learnReset}</button></div>
+  <div class="row"><button class="btn sec" data-act="resetlearn" ${LEARN.cat.length||LEARN.col.length||LEARN.st.n||RATE.length?'':'disabled'}>${T.learnReset}</button></div>
   <div class="row"><button class="btn sec" data-act="close">${T.close}</button></div>`}
 function draftHtml(){
  const d=draft;
@@ -1060,7 +1106,7 @@ document.addEventListener('click',async e=>{
    if(!confirm(T.mlConfirm))return;
    S.ml=true;ls.set('ml','1');render();
    mlLoad().then(()=>render(),()=>{alert(T.mlFail);render()})}}
- else if(a==='resetlearn'){if(confirm(T.learnResetQ)){LEARN=cleanLearn(null);ls.del('learn');render()}}
+ else if(a==='resetlearn'){if(confirm(T.learnResetQ)){LEARN=cleanLearn(null);ls.del('learn');RATE=[];ls.del('rate');render()}}
  else if(a==='color'){draft.color=v;sheet()}
  else if(a==='cat'){draft.cat=v;if(v!=='shoes')draft.sub=null;sheet()}
  else if(a==='season'){draft.season=v;sheet()}
@@ -1075,6 +1121,18 @@ document.addEventListener('click',async e=>{
    if(isFav(list))FAV=FAV.filter(f=>[...f.ids].sort().join('+')!==k);else FAV=cleanFav([...FAV,{ids:list.map(i=>i.id)}]);
    saveFav();render()}}
  else if(a==='favdel'){FAV=FAV.filter((f,idx)=>idx!==+v);saveFav();render()}
+ else if(a==='rate'){const o=S.outfits&&S.outfits[+v],r=+b.dataset.r;
+  if(o&&(r===1||r===-1)){setRate([...o.main,...o.acc],r);render()}}
+ else if(a==='planopen'){
+  let list=[];
+  if(v[0]==='o'){const o=S.outfits&&S.outfits[+v.slice(1)];if(o)list=[...o.main,...o.acc]}
+  else if(v[0]==='f'){list=((FAV[+v.slice(1)]||{ids:[]}).ids).map(id=>S.items.find(i=>i.id===id)).filter(Boolean)}
+  if(list.length>=2){const t=new Date();t.setDate(t.getDate()+1);S.planIds=list.map(i=>i.id);S.planD=dayStr(t);panel='plan';render()}}
+ else if(a==='plansave'){const d=S.planD;
+  if(S.planIds&&DATE_RE.test(d||'')&&d>=today()){PLAN=cleanPlan([...PLAN,{d,ids:S.planIds}]);savePlan();S.msg=T.planOk(fmtDate(d));panel=null;S.planIds=null;render()}}
+ else if(a==='plandel'){if(DATE_RE.test(v)){PLAN=PLAN.filter(p=>p.d!==v);savePlan();render()}}
+ else if(a==='woreplan'){const pp=PLAN.find(x=>x.d===v);
+  if(pp&&v===today()){const list=pp.ids.map(id=>S.items.find(i=>i.id===id)).filter(Boolean);if(list.length)await wearOutfit(list);PLAN=PLAN.filter(x=>x.d!==v);savePlan();render()}}
  else if(a==='undoday'){if(DATE_RE.test(v)&&confirm(T.undoDayQ)){await undoDay(v);render()}}
  else if(a==='occ'){
   const cur=occOf(draft),n=cur.includes(v)?cur.filter(x=>x!==v):[...cur,v];
@@ -1119,7 +1177,8 @@ document.addEventListener('change',async e=>{
   showPrepared(queue.shift());sheet();
  }else if(t.matches&&t.matches('[data-imp]')&&t.files&&t.files[0]){
   const f=t.files[0];t.value='';S.menu=false;await importData(f);render();
- }else if(t.matches&&t.matches('[data-outer]')){S.outer=t.checked}
+ }else if(t.matches&&t.matches('[data-pd]')){S.planD=t.value}
+ else if(t.matches&&t.matches('[data-outer]')){S.outer=t.checked}
 });
 
 openDB().then(async()=>{
