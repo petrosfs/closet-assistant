@@ -125,7 +125,7 @@ learnTitle:'Εκμάθηση',learnNote:'Κάθε φορά που επιβεβα
 learnStats:(c,k,n,ok)=>`Θυμάμαι ${c} είδη και ${k} διορθώσεις χρώματος.`+(n?` Σωστή πρώτη πρόταση είδους: ${ok} από ${n}.`:''),
 learnReset:'Σβήσε ό,τι έμαθα',learnResetQ:'Θα σβηστούν όσα έχω μάθει από τις επιβεβαιώσεις σου. Οι φωτογραφίες και η ντουλάπα σου δεν επηρεάζονται. Συνέχεια;',
 learnedColor:'Το πρότεινα από όσα μου έχεις δείξει πριν.',learnedCat:'Βοήθησαν και όσα έχεις επιβεβαιώσει πριν.',
-back:'Πίσω',mlHint:'Υπάρχει αυτόματη αναγνώριση είδους: ενεργοποίησέ την από το μενού ☰ → Ρυθμίσεις.',mlNone:'Δεν είμαι σίγουρος για το είδος. Διάλεξέ το εσύ και θα το θυμάμαι.'},
+back:'Πίσω',subQ:'Τι είδος παπουτσιού;',subs:{athletic:'Αθλητικά',sneakers:'Sneakers',boots:'Μπότες',ankle:'Μποτάκια',heels:'Τακούνια',platform:'Πλατφόρμες',flats:'Μπαλαρίνες / Flats',sandals:'Σανδάλια / Σαγιονάρες',loafers:'Loafers / Μοκασίνια'},mlHint:'Υπάρχει αυτόματη αναγνώριση είδους: ενεργοποίησέ την από το μενού ☰ → Ρυθμίσεις.',mlNone:'Δεν είμαι σίγουρος για το είδος. Διάλεξέ το εσύ και θα το θυμάμαι.'},
 en:{title:'Closet Assistant',closet:'👗 Closet',suggest:'✨ Suggest',all:'All',clothes:'Clothes',shoesF:'Shoes',acc:'Accessories',
 cats:{top:'Top',bottom:'Bottom',dress:'Dress',jumpsuit:'Jumpsuit',outer:'Outerwear',shoes:'Shoes',bag:'Bag',belt:'Belt',hat:'Hat',sunglasses:'Sunglasses',scarf:'Scarf',winterscarf:'Winter scarf',gloves:'Gloves',watch:'Watch',necklace:'Necklace',earrings:'Earrings',bracelet:'Bracelet',ring:'Ring',tights:'Tights',jewelry:'Jewelry (other)'},
 empty:'Your closet is empty. Tap + to add your first item.',
@@ -178,7 +178,7 @@ learnTitle:'Learning',learnNote:'Every time you confirm or correct an item type 
 learnStats:(c,k,n,ok)=>`I remember ${c} items and ${k} colour corrections.`+(n?` First type guess correct: ${ok} of ${n}.`:''),
 learnReset:'Erase what I learned',learnResetQ:'This erases what I learned from your confirmations. Your photos and closet are not affected. Continue?',
 learnedColor:'Suggested based on what you showed me before.',learnedCat:'What you confirmed before also helped.',
-back:'Back',mlHint:'Automatic item recognition is available: turn it on from the ☰ menu → Settings.',mlNone:'I am not sure about the type. Pick it and I will remember it.'}
+back:'Back',subQ:'What kind of shoes?',subs:{athletic:'Athletic shoes',sneakers:'Sneakers',boots:'Boots',ankle:'Ankle boots',heels:'Heels',platform:'Platforms',flats:'Ballet flats / Flats',sandals:'Sandals / Flip-flops',loafers:'Loafers / Moccasins'},mlHint:'Automatic item recognition is available: turn it on from the ☰ menu → Settings.',mlNone:'I am not sure about the type. Pick it and I will remember it.'}
 };
 // id: [hex, hue, neutral, el, en]
 const P={
@@ -221,6 +221,8 @@ const PICK={clothes:CLOTHES,shoesF:['shoes'],acc:ACC.filter(c=>c!=='jewelry')};
 const FILTERS={all:null,clothes:CLOTHES,shoesF:['shoes'],acc:ACC};
 const MALE_HIDE=['dress','jumpsuit','tights'];
 const OCC=['casual','smart','formal','sport'];
+const SUBS=['athletic','sneakers','boots','ankle','heels','platform','flats','sandals','loafers']; // shoe sub-types (optional on each pair of shoes)
+const SUBLABELS={athletic:['running shoes','athletic training shoes'],sneakers:['casual sneakers','canvas sneakers'],boots:['knee-high boots','tall boots'],ankle:['ankle boots','booties'],heels:['high heels','stiletto pumps'],platform:['platform shoes','chunky platform sandals'],flats:['ballet flats','flat shoes'],sandals:['flat sandals','flip-flops'],loafers:['loafers','moccasins']};
 const SEASONS=['all','warm','cold'];
 // Patterns. 'solid' is the default and is not stored on the item, so items saved earlier stay valid.
 const PATS=['solid','multi','print','dots','stripes','checks','animal','other'];
@@ -237,7 +239,7 @@ function loadLoc(){try{const o=JSON.parse(ls.get('loc'));if(o&&typeof o.name==='
 const S={tab:'closet',filter:'all',items:[],outer:false,outfits:null,msg:'',menu:false,
  gender:['female','male','other'].includes(ls.get('gender'))?ls.get('gender'):null,
  occ:'casual',must:null,mood:'',ml:ls.get('ml')==='1',pal:ls.get('pal')==='1',loc:loadLoc(),editLoc:false,q:'',geo:[],geoMsg:'',geoBusy:false,day:0,wxAll:null,wxErr:'',wxT:0};
-let draft=null,panel=null;
+let draft=null,panel=null;S.subF='';
 let queue=[],qTotal=0,qIndex=0; // photos picked together are reviewed one after another
 const $=s=>document.querySelector(s);
 const cname=id=>P[id][LANG==='el'?3:4];
@@ -269,6 +271,7 @@ function cleanItem(o){
   season:SEASONS.includes(o.season)?o.season:'all'};
  if(busy(o))it.pat=o.pat;
  if(Array.isArray(o.occ)){const occ=OCC.filter(x=>o.occ.includes(x));if(occ.length)it.occ=occ}
+ if(it.cat==='shoes'&&SUBS.includes(o.sub))it.sub=o.sub;
  return it}
 function exportData(){
  const blob=new Blob([JSON.stringify({app:'closet-assistant',v:2,items:S.items,learn:LEARN})],{type:'application/json'});
@@ -401,7 +404,9 @@ function mlLoad(){
   for(const c in LABELS)for(const l of LABELS[c]){cand.push('a photo of '+l);owner.push(c)}
   const t=await tm(tok(cand,{padding:true,truncation:true})),D=t.text_embeds.dims[1];
   const txt=cand.map((_,i)=>l2(t.text_embeds.data.slice(i*D,(i+1)*D)));
-  ML.ready=true;return {lib,proc,vm,txt,owner}})().catch(e=>{ML.p=null;ML.ready=false;throw e});
+  const sp=[],so=[];for(const k in SUBLABELS)for(const l of SUBLABELS[k]){sp.push('a photo of '+l);so.push(k)}
+  const t2=await tm(tok(sp,{padding:true,truncation:true})),txtSub=sp.map((_,i)=>l2(t2.text_embeds.data.slice(i*D,(i+1)*D)));
+  ML.ready=true;return {lib,proc,vm,txt,owner,txtSub,subOwner:so}})().catch(e=>{ML.p=null;ML.ready=false;throw e});
  return ML.p}
 
 /* ---------- learning (on-device memory of the user's confirmations) ----------
@@ -413,7 +418,7 @@ function cleanLearn(o){
  const L={cat:[],col:[],st:{n:0,ok:0}};
  if(!o||typeof o!=='object')return L;
  for(const x of Array.isArray(o.cat)?o.cat:[])
-  if(x&&Array.isArray(x.e)&&x.e.length===512&&x.e.every(v=>Number.isInteger(v)&&v>=-127&&v<=127)&&own(I18N.el.cats,x.c))L.cat.push({e:x.e,c:x.c});
+  if(x&&Array.isArray(x.e)&&x.e.length===512&&x.e.every(v=>Number.isInteger(v)&&v>=-127&&v<=127)&&own(I18N.el.cats,x.c))L.cat.push(x.c==='shoes'&&SUBS.includes(x.s)?{e:x.e,c:x.c,s:x.s}:{e:x.e,c:x.c});
  for(const x of Array.isArray(o.col)?o.col:[])
   if(x&&Array.isArray(x.l)&&x.l.length===3&&x.l.every(Number.isFinite)&&own(P,x.c))L.col.push({l:x.l.map(v=>Math.round(v*10)/10),c:x.c});
  if(o.st&&Number.isInteger(o.st.n)&&Number.isInteger(o.st.ok)&&o.st.n>=0&&o.st.ok>=0&&o.st.ok<=o.st.n)L.st={n:o.st.n,ok:o.st.ok};
@@ -423,11 +428,11 @@ let LEARN=loadLearn();
 const saveLearn=()=>ls.set('learn',JSON.stringify(LEARN));
 const q8=v=>v.map(x=>Math.max(-127,Math.min(127,Math.round(x*127))));
 const dq8=e=>l2(e.map(x=>x/127));
-function learnCat(emb,cat){
+function learnCat(emb,cat,sub){
  const e=q8(emb),v=dq8(e);
  // a near-identical photo already remembered: replace it instead of piling up copies
  LEARN.cat=LEARN.cat.filter(x=>!(dotp(dq8(x.e),v)>0.98&&x.c===cat));
- LEARN.cat.push({e,c:cat});if(LEARN.cat.length>LEARN_MAX.cat)LEARN.cat.shift();saveLearn()}
+ LEARN.cat.push(cat==='shoes'&&SUBS.includes(sub)?{e,c:cat,s:sub}:{e,c:cat});if(LEARN.cat.length>LEARN_MAX.cat)LEARN.cat.shift();saveLearn()}
 function learnColor(lab,col){
  const l=lab.map(v=>Math.round(v*10)/10);
  LEARN.col=LEARN.col.filter(x=>!(dist(x.l,l)<2&&x.c===col));
@@ -448,7 +453,7 @@ async function guessCat(dataUrl){
  const lg=m.txt.map((t,i)=>cats.has(m.owner[i])?100*dotp(emb,t):-1e9),mx=Math.max(...lg),ex=lg.map(x=>Math.exp(x-mx)),sm=ex.reduce((a,b)=>a+b);
  const zs={};ex.forEach((x,i)=>{zs[m.owner[i]]=(zs[m.owner[i]]||0)+x/sm});
  // learned: the most similar photos the user already confirmed vote, more weight the more alike they are
- const nb=LEARN.cat.filter(x=>cats.has(x.c)).map(x=>({c:x.c,s:dotp(emb,dq8(x.e))})).filter(x=>x.s>=SIM_MIN).sort((a,b)=>b.s-a.s).slice(0,5);
+ const nb=LEARN.cat.filter(x=>cats.has(x.c)).map(x=>({c:x.c,sub:x.s,s:dotp(emb,dq8(x.e))})).filter(x=>x.s>=SIM_MIN).sort((a,b)=>b.s-a.s).slice(0,5);
  const sc={...zs};let used=false;
  if(nb.length){
   const w=nb.map(x=>(x.s-SIM_MIN)/(1-SIM_MIN)+0.1),W=w.reduce((a,b)=>a+b,0),V={};
@@ -457,7 +462,17 @@ async function guessCat(dataUrl){
   for(const c of new Set([...Object.keys(zs),...Object.keys(V)]))sc[c]=(zs[c]||0)*(1-a)+(V[c]||0)*a;
   used=Object.keys(sc).sort((a,b)=>sc[b]-sc[a])[0]!==Object.keys(zs).sort((a,b)=>zs[b]-zs[a])[0]}
  const ranked=Object.entries(sc).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([cat,score])=>({cat,score}));
- return {ranked:ranked.length&&ranked[0].score>=0.35?ranked:null,emb:Array.from(emb),used}}
+ const good=ranked.length&&ranked[0].score>=0.35?ranked:null;
+ // shoe sub-type: same idea, zero-shot over the sub-type prompts plus the remembered shoes that look alike
+ let subs=null;
+ if(good&&good.some(r=>r.cat==='shoes')){
+  const l3=m.txtSub.map(t=>100*dotp(emb,t)),m3=Math.max(...l3),e3=l3.map(x=>Math.exp(x-m3)),s3=e3.reduce((a,b)=>a+b),z2={};
+  e3.forEach((x,i)=>z2[m.subOwner[i]]=(z2[m.subOwner[i]]||0)+x/s3);
+  const ns=nb.filter(x=>x.c==='shoes'&&x.sub),sc2={...z2};
+  if(ns.length){const w=ns.map(x=>(x.s-SIM_MIN)/(1-SIM_MIN)+0.1),W=w.reduce((a,b)=>a+b,0),V={};ns.forEach((x,i)=>V[x.sub]=(V[x.sub]||0)+w[i]/W);const a=Math.min(0.4,W/(W+2));for(const k in z2)sc2[k]=z2[k]*(1-a)+(V[k]||0)*a}
+  const r2=Object.entries(sc2).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([id,score])=>({id,score}));
+  subs=r2[0].score>=0.4?r2:null}
+ return {ranked:good,emb:Array.from(emb),used,subs}}
 
 /* ---------- photo queue ---------- */
 /* duplicate detection: 64-bit difference hash of the photo + same category/colour check */
@@ -490,7 +505,7 @@ function startGuess(){
  const d=draft;
  if(!S.ml){d.guess=null;return}
  d.guess='loading';
- guessCat(d.img).then(r=>{d.guess=r.ranked;d.emb=r.emb;d.lcat=r.used;d.mlNone=!r.ranked},()=>{d.guess=null;d.mlErr=true}).then(()=>{
+ guessCat(d.img).then(r=>{d.guess=r.ranked;d.emb=r.emb;d.lcat=r.used;d.mlNone=!r.ranked;d.subGuess=r.subs},()=>{d.guess=null;d.mlErr=true}).then(()=>{
   if(draft!==d)return;
   if(d.phase==='confirmcat'&&d.guess===null)d.phase='form';
   sheet()})}
@@ -538,6 +553,19 @@ function reasonOf(list){
  if(ids.length===1)return 'oneColor';
  if(ids.length===2){const d=hueDiff(P[ids[0]][1],P[ids[1]][1]);if(d<=30)return 'analog';if(d>=150)return 'compl'}
  return 'mix'}
+// How well a pair of shoes suits the occasion and the weather (shoes without a sub-type stay neutral).
+const SHOE_OCC={casual:{sneakers:.6,athletic:.2,flats:.4,loafers:.4,ankle:.3,boots:.2,platform:.2,sandals:.3,heels:-.3},
+ smart:{heels:.6,loafers:.6,flats:.5,ankle:.5,boots:.3,platform:.3,sneakers:-.1,athletic:-.8,sandals:-.2},
+ formal:{heels:1,flats:.5,loafers:.4,ankle:.4,boots:.1,platform:.3,sneakers:-.8,athletic:-1.5,sandals:-.5},
+ sport:{athletic:1.2,sneakers:.8,boots:-.8,ankle:-.8,heels:-1.5,platform:-1,flats:-.8,sandals:-.8,loafers:-1}};
+function shoeFit(i,o){
+ if(!i||!i.sub)return 0;
+ let v=((SHOE_OCC[o.occ]||{})[i.sub])||0;
+ const w=o.w;if(w){
+  if(w.rain>=60)v+=({boots:.6,ankle:.6,sneakers:.2,athletic:.2,sandals:-1,flats:-.3,heels:-.3,platform:-.3})[i.sub]||0;
+  if(w.tmax<12)v+=({boots:.8,ankle:.6,sandals:-1.2,flats:-.3})[i.sub]||0;
+  if(w.tmax>=26)v+=({sandals:.8,flats:.3,boots:-1,ankle:-.8})[i.sub]||0}
+ return v}
 const DRESSY=['watch','necklace','earrings','bracelet','ring','jewelry'];
 function moodScore(b,list,mood){
  const n=chromaIds(list).length,full=b.length===1;
@@ -578,7 +606,7 @@ function suggest(items,o,must){
  const cand=[];
  for(const b of bases)for(const x of (outs.length?outs:[null]))for(const s of (sh.length?sh:[null])){
   const main=[...b];if(x)main.push(x);if(s)main.push(s);
-  cand.push({main,key:b.map(i=>i.id).join('+'),score:fit(main)+moodScore(b,main,o.mood)+Math.random()*.8})}
+  cand.push({main,key:b.map(i=>i.id).join('+'),score:fit(main)+moodScore(b,main,o.mood)+shoeFit(s,o)+Math.random()*.8})}
  cand.sort((a,b)=>b.score-a.score);
  const pick=[],used=new Set();
  for(const c of cand){if(pick.length>=3)break;if(!used.has(c.key)){used.add(c.key);pick.push(c)}}
@@ -586,7 +614,7 @@ function suggest(items,o,must){
  return pick.map(c=>({main:c.main,acc:addAcc(c.main,items,o,must),reason:reasonOf(c.main)}))}
 // Strict filters first; if the wardrobe is too small for them, relax weather, then occasion, then both.
 function plan(items,occ,w,manualOuter,mood,must){
- const o=wxOpts(w,manualOuter);o.mood=mood||'';
+ const o=wxOpts(w,manualOuter);o.mood=mood||'';o.occ=occ;o.w=w;
  const tries=w?[[1,1,''],[0,1,'noSeason'],[1,0,'noOcc'],[0,0,'noBoth']]:[[0,1,''],[0,0,'noOcc']];
  const msg=!items.some(i=>i.cat==='outer')&&o.outer&&!(must&&must.cat==='outer')?'needOuter':'';
  for(const [us,uo,m] of tries){
@@ -649,7 +677,8 @@ function render(){
  let h=`<header><button class="menu-btn" data-act="menu" aria-label="${T.menu}">☰</button><h1>${T.title}</h1><span class="sp"></span></header>`;
  if(S.tab==='closet'){
   h+=`<div class="chips">`+Object.keys(FILTERS).map(f=>`<button class="chip ${S.filter===f?'on':''}" data-act="filter" data-v="${f}">${T[f]}</button>`).join('')+`</div>`;
-  const cats=FILTERS[S.filter],list=S.items.filter(i=>!cats||cats.includes(i.cat));
+  if(S.filter==='shoesF')h+=`<div class="chips">`+chip(!S.subF,'subfilter','',T.all)+SUBS.map(k=>chip(S.subF===k,'subfilter',k,T.subs[k])).join('')+`</div>`;
+  const cats=FILTERS[S.filter],list=S.items.filter(i=>(!cats||cats.includes(i.cat))&&!(S.filter==='shoesF'&&S.subF&&i.sub!==S.subF));
   h+=list.length?`<div class="grid">`+list.map(i=>tile(i,'button',`data-act="item" data-v="${i.id}"`)).join('')+`</div>`:`<div class="empty">${T.empty}</div>`;
   h+=`<div class="note">${T.note}</div><button class="fab" data-act="fab" aria-label="+">+</button>`;
  }else h+=suggestView();
@@ -694,6 +723,12 @@ function draftHtml(){
   h+=`<div class="lbl">${T.detected}</div><div class="det"><i style="background:${P[d.det][0]}"></i><b>${cname(d.det)}</b></div>${d.lc?`<div class="small">${T.learnedColor}</div>`:''}<div class="lbl">${T.correct}</div>
   <div class="row"><button class="btn" data-act="yes">${T.yes}</button><button class="btn sec" data-act="no">${T.no}</button></div>`;
   if(skip)h+=`<div class="row">${skip}</div>`;
+ }else if(d.phase==='confirmsub'&&d.subGuess){
+  const g=d.subGuess;
+  h+=`<div class="lbl">${T.mlGuess}</div><div class="det"><span style="font-size:32px">${EMOJI.shoes}</span><b>${T.subs[g[0].id]}</b></div><div class="lbl">${T.correct}</div>
+  <div class="row"><button class="btn" data-act="subyes">${T.yes}</button><button class="btn sec" data-act="subno">${T.no}</button></div>`;
+  if(g.length>1)h+=`<div class="lbl">${T.mlMaybe}</div><div class="chips">`+g.slice(1).map(x=>chip(false,'picksub',x.id,T.subs[x.id])).join('')+`</div>`;
+  if(skip||back)h+=`<div class="row">${back}${skip}</div>`;
  }else if(d.phase==='dupchk'){h+=`<div class="lbl">${T.processing}</div>`;
  }else if(d.phase==='dup'&&d.dup){
   const o=d.dup.it;
@@ -721,6 +756,7 @@ function draftHtml(){
    if(g==='acc'&&d.cat==='jewelry')ks=[...ks,'jewelry'];
    return `<div class="lbl" style="margin:4px 0 6px"><b>${T[g]}</b></div><div class="chips">`+
     ks.map(k=>chip(d.cat===k,'cat',k,`${EMOJI[k]} ${T.cats[k]}`)).join('')+`</div>`}).join('');
+  if(d.cat==='shoes')h+=`<div class="lbl">${T.subQ}</div><div class="chips">`+SUBS.map(k=>chip(d.sub===k,'sub',k,T.subs[k])).join('')+`</div>`;
   const occ=occOf(d);
   h+=`<div class="lbl">${T.patQ}</div><div class="chips">`+PATS.map(k=>chip(patOf(d)===k,'pat',k,T.pats[k])).join('')+`</div>`;
   h+=`<div class="lbl">${T.occQ}</div><div class="chips">`+OCC.map(o=>chip(occ.includes(o),'occ',o,T.occs[o])).join('')+`</div>`;
@@ -744,12 +780,13 @@ async function doSave(a){
   const isNew=!draft.id;
   if(isNew){try{
    if(draft.lab&&draft.color&&(draft.color!==draft.auto||draft.color!==draft.det))learnColor(draft.lab,draft.color);
-   if(draft.emb&&draft.cat)learnCat(draft.emb,draft.cat);
+   if(draft.emb&&draft.cat)learnCat(draft.emb,draft.cat,draft.sub);
    if(Array.isArray(draft.guess)&&draft.cat&&!draft.counted){LEARN.st.n++;if(draft.guess[0].cat===draft.cat)LEARN.st.ok++;draft.counted=true;saveLearn()}
   }catch(_){}}
   const it={id:draft.id||Date.now()+'-'+Math.random().toString(36).slice(2,7),img:draft.img,color:draft.color,cat:draft.cat,
    season:draft.season||'all',occ:Array.isArray(draft.occ)&&draft.occ.length?draft.occ:occOf(draft),t:draft.t||Date.now()};
   if(busy(draft))it.pat=patOf(draft);
+  if(it.cat==='shoes'&&SUBS.includes(draft.sub))it.sub=draft.sub;
   await dbPut(it);await reload();S.outfits=null;
   if(a==='savemore'&&isNew)draft={id:null,img:null,color:null,cat:null,season:'all',phase:'photo',det:null};
   else if(isNew&&queue.length)advance();
@@ -773,7 +810,7 @@ document.addEventListener('click',async e=>{
  else if(a==='setgender'){S.gender=v;ls.set('gender',v);render()}
  else if(a==='tab'){S.tab=v;render();
   if(v==='suggest'&&S.loc&&(!S.wxAll||Date.now()-S.wxT>36e5)){await loadWx();render()}}
- else if(a==='filter'){S.filter=v;render()}
+ else if(a==='filter'){S.filter=v;S.subF='';render()}
  else if(a==='setocc'){S.occ=v;render()}
  else if(a==='setmood'){S.mood=v;render()}
  else if(a==='openmust'){panel='pickitem';render()}
@@ -796,10 +833,15 @@ document.addEventListener('click',async e=>{
  else if(a==='nophoto'){go('form');sheet()}
  else if(a==='yes'){draft.color=draft.det;afterColor();sheet()}
  else if(a==='no'){afterColor();sheet()}
- else if(a==='guessyes'){if(Array.isArray(draft.guess))draft.cat=draft.guess[0].cat;go('form');sheet()}
+ else if(a==='guessyes'){if(Array.isArray(draft.guess))draft.cat=draft.guess[0].cat;go(draft.cat==='shoes'&&draft.subGuess?'confirmsub':'form');sheet()}
  else if(a==='guessno'){go('form');sheet()}
- else if(a==='pickguess'){draft.cat=v;go('form');sheet()}
- else if(a==='back'){const d=draft;if(d&&d.hist&&d.hist.length){const prev=d.hist.pop();if(prev==='confirm')d.color=null;if(prev==='confirm'||prev==='confirmcat')d.cat=null;d.phase=prev;sheet()}}
+ else if(a==='pickguess'){draft.cat=v;go(v==='shoes'&&draft.subGuess?'confirmsub':'form');sheet()}
+ else if(a==='subyes'){draft.sub=draft.subGuess[0].id;go('form');sheet()}
+ else if(a==='subno'){go('form');sheet()}
+ else if(a==='picksub'){draft.sub=v;go('form');sheet()}
+ else if(a==='sub'){draft.sub=draft.sub===v?null:v;sheet()}
+ else if(a==='subfilter'){S.subF=v;render()}
+ else if(a==='back'){const d=draft;if(d&&d.hist&&d.hist.length){const prev=d.hist.pop();if(prev==='confirm')d.color=null;if(prev==='confirm'||prev==='confirmcat')d.cat=null;if(prev!=='form')d.sub=null;d.phase=prev;sheet()}}
  else if(a==='skip'){advance()}
  else if(a==='togglepal'){S.pal=!S.pal;ls.set('pal',S.pal?'1':'0');if(draft||panel)sheet();else render()}
  else if(a==='toggleml'){
@@ -810,7 +852,7 @@ document.addEventListener('click',async e=>{
    mlLoad().then(()=>render(),()=>{alert(T.mlFail);render()})}}
  else if(a==='resetlearn'){if(confirm(T.learnResetQ)){LEARN=cleanLearn(null);ls.del('learn');render()}}
  else if(a==='color'){draft.color=v;sheet()}
- else if(a==='cat'){draft.cat=v;sheet()}
+ else if(a==='cat'){draft.cat=v;if(v!=='shoes')draft.sub=null;sheet()}
  else if(a==='season'){draft.season=v;sheet()}
  else if(a==='pat'){draft.pat=v;sheet()}
  else if(a==='occ'){
