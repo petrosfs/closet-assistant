@@ -79,14 +79,15 @@ empty:'Η ντουλάπα είναι άδεια. Πάτα + για να προ�
 addTitle:'Νέο κομμάτι',edit:'Επεξεργασία',takePhoto:'📷 Φωτογραφία',gallery:'🖼️ Από τη συλλογή (μία ή πολλές)',noPhoto:'Χωρίς φωτογραφία',
 detected:'Ανίχνευσα χρώμα:',correct:'Είναι σωστό;',yes:'Ναι',no:'Όχι',
 pickColor:'Χρώμα',pickCat:'Τι είναι;',save:'Αποθήκευση',del:'Διαγραφή',cancel:'Άκυρο',close:'Κλείσιμο',confirmDel:'Διαγραφή αυτού του κομματιού;',
-occQ:'Για ποιες περιστάσεις;',seasonQ:'Για ποιον καιρό;',
+occQ:'Για ποιες περιστάσεις;',seasonQ:'Για ποιον καιρό;',patQ:'Σχέδιο;',
+pats:{solid:'Μονόχρωμο',multi:'Πολύχρωμο',print:'Εμπριμέ',dots:'Πουά',stripes:'Ριγέ',checks:'Καρό',animal:'Animal print',other:'Άλλο σχέδιο'},
 seasons:{all:'Όλους',warm:'☀️ Ζέστη',cold:'❄️ Κρύο'},
 occasion:'Περίσταση',occs:{casual:'Καθημερινά',smart:'Δουλειά / smart',formal:'Βραδινή / επίσημο',sport:'Αθλητικά'},
 withOuter:'Με εξωτερικό (μπουφάν, παλτό)',go:'Πρότεινε συνδυασμούς',again:'Άλλες προτάσεις',
 needBase:'Χρειάζεται τουλάχιστον ένα φόρεμα ή μια ολόσωμη φόρμα, ή ένα πάνω και ένα κάτω.',
 needOuter:'Δεν έχεις αποθηκεύσει εξωτερικό, οπότε οι προτάσεις είναι χωρίς.',
 imgErr:'Δεν μπόρεσα να διαβάσω τη φωτογραφία.',
-reasons:{allNeutral:'Ουδέτερα χρώματα',oneColor:'Ένα χρώμα με ουδέτερα',analog:'Παρόμοιες αποχρώσεις',compl:'Συμπληρωματικά χρώματα',mix:'Χρωματικός συνδυασμός'},
+reasons:{allNeutral:'Ουδέτερα χρώματα',oneColor:'Ένα χρώμα με ουδέτερα',analog:'Παρόμοιες αποχρώσεις',compl:'Συμπληρωματικά χρώματα',mix:'Χρωματικός συνδυασμός',patMix:'Ένα σχέδιο, τα άλλα μονόχρωμα'},
 note:'Τα δεδομένα αποθηκεύονται μόνο σε αυτή τη συσκευή. Αν καθαρίσεις τα δεδομένα του browser, χάνονται. Κάνε εξαγωγή αντιγράφου κατά διαστήματα.',
 coldHint:'Κασκόλ και γάντια προτείνονται μόνο όταν αυτό είναι τικαρισμένο.',
 backup:'Αντίγραφο ασφαλείας',exportB:'⬇️ Εξαγωγή',importB:'⬆️ Εισαγωγή',
@@ -131,14 +132,15 @@ empty:'Your closet is empty. Tap + to add your first item.',
 addTitle:'New item',edit:'Edit',takePhoto:'📷 Take photo',gallery:'🖼️ From gallery (one or more)',noPhoto:'No photo',
 detected:'Detected colour:',correct:'Is that right?',yes:'Yes',no:'No',
 pickColor:'Colour',pickCat:'What is it?',save:'Save',del:'Delete',cancel:'Cancel',close:'Close',confirmDel:'Delete this item?',
-occQ:'For which occasions?',seasonQ:'For which weather?',
+occQ:'For which occasions?',seasonQ:'For which weather?',patQ:'Pattern?',
+pats:{solid:'Plain',multi:'Multicolour',print:'Printed',dots:'Polka dots',stripes:'Striped',checks:'Checked',animal:'Animal print',other:'Other pattern'},
 seasons:{all:'Any',warm:'☀️ Hot',cold:'❄️ Cold'},
 occasion:'Occasion',occs:{casual:'Everyday',smart:'Work / smart',formal:'Evening / formal',sport:'Sporty'},
 withOuter:'With outerwear (jacket, coat)',go:'Suggest outfits',again:'More suggestions',
 needBase:'You need at least a dress or a jumpsuit, or one top and one bottom.',
 needOuter:'You have no outerwear saved, so suggestions are without.',
 imgErr:'Could not read the photo.',
-reasons:{allNeutral:'Neutral colours',oneColor:'One colour with neutrals',analog:'Similar shades',compl:'Complementary colours',mix:'Colour mix'},
+reasons:{allNeutral:'Neutral colours',oneColor:'One colour with neutrals',analog:'Similar shades',compl:'Complementary colours',mix:'Colour mix',patMix:'One pattern, the rest plain'},
 note:'Data is stored on this device only. Clearing browser data erases it. Export a backup from time to time.',
 coldHint:'Winter scarves and gloves are only suggested when this is ticked.',
 backup:'Backup',exportB:'⬇️ Export',importB:'⬆️ Import',
@@ -220,6 +222,10 @@ const FILTERS={all:null,clothes:CLOTHES,shoesF:['shoes'],acc:ACC};
 const MALE_HIDE=['dress','jumpsuit','tights'];
 const OCC=['casual','smart','formal','sport'];
 const SEASONS=['all','warm','cold'];
+// Patterns. 'solid' is the default and is not stored on the item, so items saved earlier stay valid.
+const PATS=['solid','multi','print','dots','stripes','checks','animal','other'];
+const patOf=i=>i&&PATS.includes(i.pat)?i.pat:'solid';
+const busy=i=>patOf(i)!=='solid';
 
 const ls={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},del:k=>{try{localStorage.removeItem(k)}catch(e){}}};
 const own=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
@@ -261,6 +267,7 @@ function cleanItem(o){
  const id=typeof o.id==='string'&&/^[\w.-]{1,64}$/.test(o.id)?o.id:Date.now()+'-'+Math.random().toString(36).slice(2,7);
  const it={id,img:typeof o.img==='string'&&IMG_RE.test(o.img)?o.img:null,color:o.color,cat:o.cat,t:Number.isFinite(o.t)?o.t:Date.now(),
   season:SEASONS.includes(o.season)?o.season:'all'};
+ if(busy(o))it.pat=o.pat;
  if(Array.isArray(o.occ)){const occ=OCC.filter(x=>o.occ.includes(x));if(occ.length)it.occ=occ}
  return it}
 function exportData(){
@@ -474,7 +481,7 @@ async function findDup(d){
   let strong=false;
   if(d.h&&it.img){const h=await hashOfItem(it);if(h&&ham(h,d.h)<=8)strong=true}
   if(strong)return {it,strong:true};
-  if(!best&&it.cat===d.cat&&fam(it.color)===fam(d.color))best={it,strong:false}}
+  if(!best&&it.cat===d.cat&&fam(it.color)===fam(d.color)&&patOf(it)===patOf(d))best={it,strong:false}}
  return best}
 async function prepFile(f){const img=await loadImg(f),c=shrink(img);let h=null;try{h=dHash(c)}catch(_){}
  const f2=detectFull(c),sg=suggestColor(f2.lab,f2.id);
@@ -515,8 +522,18 @@ function cs(list){
  if(ids.length===0)s+=.5;
  if(ids.length===1)s+=1.2;
  return s}
+/* One patterned piece among plain ones looks deliberate; two or more fight each other.
+   A patterned accessory is far less loud than a patterned garment, so it costs less. */
+function patScore(list){
+ const b=list.filter(busy),n=b.length;
+ if(n===0)return 0;
+ if(n===1)return .8;
+ if(n===2)return b.filter(i=>!ACC.includes(i.cat)).length>=2?-3:-1.2;
+ return -5}
+const fit=list=>cs(list)+patScore(list);
 function reasonOf(list){
  const ids=chromaIds(list);
+ if(list.filter(busy).length===1)return 'patMix';
  if(ids.length===0)return 'allNeutral';
  if(ids.length===1)return 'oneColor';
  if(ids.length===2){const d=hueDiff(P[ids[0]][1],P[ids[1]][1]);if(d<=30)return 'analog';if(d>=150)return 'compl'}
@@ -543,8 +560,8 @@ function addAcc(main,items,o,must){
   const cand=items.filter(i=>i.cat===c);if(!cand.length)continue;
   if(c!=='bag'&&extra>=cap)continue;
   let best=null,bs=-1e9;
-  for(const i of cand){const s=cs([...cur,i])+Math.random()*.4;if(s>bs){bs=s;best=i}}
-  if(c==='bag'||cs([...cur,best])>=cs(cur)-.01){cur.push(best);picked.push(best);if(c!=='bag')extra++}
+  for(const i of cand){const s=fit([...cur,i])+Math.random()*.4;if(s>bs){bs=s;best=i}}
+  if(c==='bag'||fit([...cur,best])>=fit(cur)-.01){cur.push(best);picked.push(best);if(c!=='bag')extra++}
  }
  return picked}
 function suggest(items,o,must){
@@ -561,7 +578,7 @@ function suggest(items,o,must){
  const cand=[];
  for(const b of bases)for(const x of (outs.length?outs:[null]))for(const s of (sh.length?sh:[null])){
   const main=[...b];if(x)main.push(x);if(s)main.push(s);
-  cand.push({main,key:b.map(i=>i.id).join('+'),score:cs(main)+moodScore(b,main,o.mood)+Math.random()*.8})}
+  cand.push({main,key:b.map(i=>i.id).join('+'),score:fit(main)+moodScore(b,main,o.mood)+Math.random()*.8})}
  cand.sort((a,b)=>b.score-a.score);
  const pick=[],used=new Set();
  for(const c of cand){if(pick.length>=3)break;if(!used.has(c.key)){used.add(c.key);pick.push(c)}}
@@ -600,7 +617,7 @@ function suggestView(){
   OCC.map(o=>`<button class="chip ${S.occ===o?'on':''}" data-act="setocc" data-v="${o}">${T.occs[o]}</button>`).join('')+`</div></div>`;
  const mi=S.must&&S.items.find(i=>i.id===S.must);
  h+=`<div class="pad"><div class="lbl">${T.mustQ}</div>`+(mi?
-  `<div style="display:flex;gap:10px;align-items:center"><div style="width:64px;flex:none">${tile(mi)}</div><b style="flex:1">${T.cats[mi.cat]} · ${cname(mi.color)}</b><button class="btn sec" style="flex:none;padding:10px 14px" data-act="openmust">${T.change}</button><button class="btn sec" style="flex:none;padding:10px 14px" data-act="clearmust">${T.clearB}</button></div>`
+  `<div style="display:flex;gap:10px;align-items:center"><div style="width:64px;flex:none">${tile(mi)}</div><b style="flex:1">${T.cats[mi.cat]} · ${cname(mi.color)}${busy(mi)?' · '+T.pats[patOf(mi)]:''}</b><button class="btn sec" style="flex:none;padding:10px 14px" data-act="openmust">${T.change}</button><button class="btn sec" style="flex:none;padding:10px 14px" data-act="clearmust">${T.clearB}</button></div>`
   :`<button class="btn sec" data-act="openmust">${T.pickItem}</button>`)+`</div>`;
  h+=`<div class="pad"><div class="lbl">${T.mood}</div><div class="chips" style="padding:0">`+
   ['','comfy','elegant','bold'].map(m=>chip(S.mood===m,'setmood',m,T.moods[m])).join('')+`</div><div class="small" style="margin-top:6px">${T.moodHint}</div></div>`;
@@ -625,7 +642,7 @@ function suggestView(){
  h+=`<div class="pad"><button class="btn" data-act="go">${S.outfits?T.again:T.go}</button></div>`;
  if(S.msg)h+=`<div class="pad" style="color:var(--mut)">${S.msg}</div>`;
  if(S.outfits)h+=S.outfits.map(o=>`<div class="outfit"><small>${T.reasons[o.reason]}</small><div class="pieces">`+
-  [...o.main,...o.acc].map(i=>`<div class="piece">${tile(i)}${T.cats[i.cat]}<span>${cname(i.color)}</span></div>`).join('')+`</div></div>`).join('');
+  [...o.main,...o.acc].map(i=>`<div class="piece">${tile(i)}${T.cats[i.cat]}<span>${cname(i.color)}${busy(i)?' · '+T.pats[patOf(i)]:''}</span></div>`).join('')+`</div></div>`).join('');
  return h}
 function render(){
  document.documentElement.lang=LANG;T=I18N[LANG];applyTheme();
@@ -705,6 +722,7 @@ function draftHtml(){
    return `<div class="lbl" style="margin:4px 0 6px"><b>${T[g]}</b></div><div class="chips">`+
     ks.map(k=>chip(d.cat===k,'cat',k,`${EMOJI[k]} ${T.cats[k]}`)).join('')+`</div>`}).join('');
   const occ=occOf(d);
+  h+=`<div class="lbl">${T.patQ}</div><div class="chips">`+PATS.map(k=>chip(patOf(d)===k,'pat',k,T.pats[k])).join('')+`</div>`;
   h+=`<div class="lbl">${T.occQ}</div><div class="chips">`+OCC.map(o=>chip(occ.includes(o),'occ',o,T.occs[o])).join('')+`</div>`;
   h+=`<div class="lbl">${T.seasonQ}</div><div class="chips">`+SEASONS.map(s=>chip((d.season||'all')===s,'season',s,T.seasons[s])).join('')+`</div>`;
   const more=!d.id&&qTotal<=1?`<button class="btn sec" data-act="savemore" ${d.color&&d.cat?'':'disabled'}>${T.saveMore}</button>`:'';
@@ -731,6 +749,7 @@ async function doSave(a){
   }catch(_){}}
   const it={id:draft.id||Date.now()+'-'+Math.random().toString(36).slice(2,7),img:draft.img,color:draft.color,cat:draft.cat,
    season:draft.season||'all',occ:Array.isArray(draft.occ)&&draft.occ.length?draft.occ:occOf(draft),t:draft.t||Date.now()};
+  if(busy(draft))it.pat=patOf(draft);
   await dbPut(it);await reload();S.outfits=null;
   if(a==='savemore'&&isNew)draft={id:null,img:null,color:null,cat:null,season:'all',phase:'photo',det:null};
   else if(isNew&&queue.length)advance();
@@ -793,6 +812,7 @@ document.addEventListener('click',async e=>{
  else if(a==='color'){draft.color=v;sheet()}
  else if(a==='cat'){draft.cat=v;sheet()}
  else if(a==='season'){draft.season=v;sheet()}
+ else if(a==='pat'){draft.pat=v;sheet()}
  else if(a==='occ'){
   const cur=occOf(draft),n=cur.includes(v)?cur.filter(x=>x!==v):[...cur,v];
   if(n.length)draft.occ=OCC.filter(x=>n.includes(x));
