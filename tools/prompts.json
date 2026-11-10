@@ -1,0 +1,312 @@
+{
+ "sub": {
+  "top": {
+   "tshirt": [
+    "a t-shirt",
+    "a short-sleeved tee"
+   ],
+   "longsleeve": [
+    "a long-sleeved t-shirt",
+    "a long sleeve top"
+   ],
+   "tank": [
+    "a tank top",
+    "a camisole",
+    "a sleeveless top",
+    "a strappy top",
+    "a spaghetti strap top"
+   ],
+   "crop": [
+    "a crop top",
+    "a cropped top",
+    "a sleeveless crop top"
+   ],
+   "bustier": [
+    "a bustier top",
+    "a strapless top",
+    "a corset top"
+   ],
+   "bodysuit": [
+    "a bodysuit"
+   ],
+   "blouse": [
+    "a blouse",
+    "a tunic blouse"
+   ],
+   "shirt": [
+    "a button-up shirt",
+    "a collared shirt"
+   ],
+   "polo": [
+    "a polo shirt"
+   ],
+   "sweater": [
+    "a sweater",
+    "a knitted jumper",
+    "a pullover",
+    "a striped sweater"
+   ],
+   "turtleneck": [
+    "a turtleneck sweater",
+    "a turtleneck top"
+   ],
+   "sweatshirt": [
+    "a crewneck sweatshirt",
+    "a sweatshirt without a hood"
+   ],
+   "hoodie": [
+    "a hoodie",
+    "a hooded sweatshirt"
+   ],
+   "sportstop": [
+    "a sports bra",
+    "an athletic workout top"
+   ]
+  },
+  "bottom": {
+   "jeans": [
+    "denim jeans",
+    "jeans",
+    "a pair of jeans"
+   ],
+   "trousers": [
+    "suit pants",
+    "dress pants",
+    "trousers",
+    "cotton trousers"
+   ],
+   "sweatpants": [
+    "sweatpants",
+    "a pair of sweatpants"
+   ],
+   "shorts": [
+    "shorts"
+   ],
+   "skirtmini": [
+    "a mini skirt",
+    "a short skirt"
+   ],
+   "skirtmidi": [
+    "a midi skirt",
+    "a knee-length skirt",
+    "a pleated midi skirt"
+   ],
+   "skirtlong": [
+    "a long maxi skirt",
+    "a floor-length skirt"
+   ],
+   "leggings": [
+    "leggings",
+    "yoga pants"
+   ]
+  },
+  "dress": {
+   "dressmini": [
+    "a mini dress",
+    "a short dress"
+   ],
+   "dressmidi": [
+    "a midi dress",
+    "a knee-length dress",
+    "a wrap dress"
+   ],
+   "dressmaxi": [
+    "a maxi dress",
+    "a long dress"
+   ]
+  },
+  "jumpsuit": {
+   "jumplong": [
+    "a jumpsuit"
+   ],
+   "romper": [
+    "a romper",
+    "a playsuit"
+   ],
+   "overalls": [
+    "overalls",
+    "dungarees"
+   ]
+  },
+  "outer": {
+   "jacket": [
+    "a jacket",
+    "a bomber jacket",
+    "a denim jacket",
+    "a leather jacket"
+   ],
+   "coat": [
+    "a coat",
+    "a long wool coat"
+   ],
+   "trench": [
+    "a trench coat"
+   ],
+   "puffer": [
+    "a puffer jacket",
+    "a down jacket",
+    "a padded winter coat"
+   ],
+   "blazer": [
+    "a blazer"
+   ],
+   "cardigan": [
+    "a cardigan"
+   ],
+   "vest": [
+    "a vest",
+    "a sleeveless gilet"
+   ],
+   "raincoat": [
+    "a raincoat",
+    "a windbreaker"
+   ]
+  },
+  "shoes": {
+   "athletic": [
+    "running shoes",
+    "athletic training shoes"
+   ],
+   "sneakers": [
+    "casual sneakers",
+    "canvas sneakers"
+   ],
+   "boots": [
+    "knee-high boots",
+    "tall boots"
+   ],
+   "ankle": [
+    "ankle boots",
+    "booties"
+   ],
+   "heels": [
+    "high heels",
+    "stiletto pumps"
+   ],
+   "platform": [
+    "platform shoes",
+    "chunky platform sandals"
+   ],
+   "flats": [
+    "ballet flats",
+    "flat shoes"
+   ],
+   "sandals": [
+    "flat sandals",
+    "flip-flops"
+   ],
+   "loafers": [
+    "loafers",
+    "moccasins"
+   ]
+  },
+  "bag": {
+   "handbag": [
+    "a handbag",
+    "a shoulder bag"
+   ],
+   "tote": [
+    "a tote bag",
+    "a shopper bag"
+   ],
+   "crossbody": [
+    "a crossbody bag"
+   ],
+   "backpack": [
+    "a backpack",
+    "a leather backpack",
+    "a rucksack"
+   ],
+   "clutch": [
+    "a clutch bag",
+    "an evening clutch"
+   ],
+   "beltbag": [
+    "a belt bag",
+    "a fanny pack"
+   ]
+  },
+  "hat": {
+   "cap": [
+    "a baseball cap",
+    "a cap"
+   ],
+   "beanie": [
+    "a beanie",
+    "a knitted winter hat"
+   ],
+   "sunhat": [
+    "a straw sun hat",
+    "a wide-brim sun hat",
+    "a bucket hat"
+   ],
+   "fedora": [
+    "a fedora hat",
+    "a felt hat"
+   ]
+  }
+ },
+ "cat": {
+  "shoes": [
+   "sneakers",
+   "boots",
+   "sandals",
+   "high heels",
+   "flat shoes"
+  ],
+  "belt": [
+   "a belt",
+   "a leather belt",
+   "a waist belt"
+  ],
+  "sunglasses": [
+   "sunglasses"
+  ],
+  "scarf": [
+   "a silk scarf"
+  ],
+  "winterscarf": [
+   "a knitted winter scarf"
+  ],
+  "gloves": [
+   "gloves"
+  ],
+  "watch": [
+   "a wristwatch"
+  ],
+  "necklace": [
+   "a necklace"
+  ],
+  "earrings": [
+   "earrings"
+  ],
+  "bracelet": [
+   "a bracelet"
+  ],
+  "ring": [
+   "a jewelry ring"
+  ],
+  "tights": [
+   "tights"
+  ]
+ },
+ "mat": {
+  "leather": [
+   "a leather garment",
+   "a leather accessory"
+  ],
+  "suede": [
+   "a suede garment",
+   "a suede accessory"
+  ],
+  "cotton": [
+   "a cotton jersey garment",
+   "cotton fabric clothing"
+  ],
+  "synthetic": [
+   "a polyester garment",
+   "a nylon garment",
+   "synthetic sportswear fabric"
+  ]
+ }
+}
