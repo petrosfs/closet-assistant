@@ -1,0 +1,29 @@
+{
+ "off": {
+  "puffercoat": -1.0,
+  "tunic": -0.9,
+  "wraptop": -1.24,
+  "cargo": -1.57,
+  "palazzo": 0.0,
+  "bermuda": -0.66,
+  "skort": -2.21,
+  "parka": -0.38,
+  "fleece": -1.08,
+  "overshirt": 0.0,
+  "poncho": 0.0,
+  "kimono": 0.0,
+  "fur": 0.0,
+  "mules": -0.01,
+  "espadrilles": 0.0,
+  "slippers": -0.4,
+  "rainboots": 0.0,
+  "beret": 0.0,
+  "bucket": 0.0,
+  "headband": 0.0
+ },
+ "coff": {
+  "homewear": -1,
+  "outer": -2.0,
+  "top": -0.5
+ }
+}

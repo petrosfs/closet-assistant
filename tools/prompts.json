@@ -61,6 +61,14 @@
    "sportstop": [
     "a sports bra",
     "an athletic workout top"
+   ],
+   "tunic": [
+    "a tunic top",
+    "a long loose tunic blouse"
+   ],
+   "wraptop": [
+    "a wrap top",
+    "a cross-front wrap blouse"
    ]
   },
   "bottom": {
@@ -98,6 +106,22 @@
    "leggings": [
     "leggings",
     "yoga pants"
+   ],
+   "cargo": [
+    "cargo pants",
+    "utility trousers with large pockets"
+   ],
+   "palazzo": [
+    "wide-leg palazzo trousers",
+    "flowy culottes"
+   ],
+   "bermuda": [
+    "bermuda shorts",
+    "knee-length shorts"
+   ],
+   "skort": [
+    "a skort",
+    "a skirt with built-in shorts"
    ]
   },
   "dress": {
@@ -167,6 +191,30 @@
    "raincoat": [
     "a raincoat",
     "a windbreaker"
+   ],
+   "parka": [
+    "a parka",
+    "a hooded parka with fur trim"
+   ],
+   "fleece": [
+    "a fleece jacket",
+    "a zip-up fleece"
+   ],
+   "overshirt": [
+    "an overshirt",
+    "a flannel shirt jacket"
+   ],
+   "poncho": [
+    "a poncho",
+    "a knitted cape"
+   ],
+   "kimono": [
+    "a kimono cardigan",
+    "a long open duster cardigan"
+   ],
+   "fur": [
+    "a fur coat",
+    "a faux fur jacket"
    ]
   },
   "shoes": {
@@ -205,6 +253,23 @@
    "loafers": [
     "loafers",
     "moccasins"
+   ],
+   "mules": [
+    "mules",
+    "clogs",
+    "backless slip-on shoes"
+   ],
+   "espadrilles": [
+    "espadrilles",
+    "rope sole shoes"
+   ],
+   "slippers": [
+    "slippers",
+    "fluffy house slippers"
+   ],
+   "rainboots": [
+    "rain boots",
+    "rubber wellington boots"
    ]
   },
   "bag": {
@@ -231,6 +296,14 @@
    "beltbag": [
     "a belt bag",
     "a fanny pack"
+   ],
+   "wallet": [
+    "a wallet",
+    "a leather purse wallet"
+   ],
+   "suitcase": [
+    "a suitcase",
+    "a rolling luggage travel bag"
    ]
   },
   "hat": {
@@ -250,6 +323,49 @@
    "fedora": [
     "a fedora hat",
     "a felt hat"
+   ],
+   "beret": [
+    "a beret"
+   ],
+   "bucket": [
+    "a bucket hat"
+   ],
+   "headband": [
+    "a headband",
+    "a hair band"
+   ]
+  },
+  "swim": {
+   "bikini": [
+    "a bikini",
+    "a bikini top and bottom"
+   ],
+   "swimsuit": [
+    "a one-piece swimsuit",
+    "a swimsuit"
+   ],
+   "coverup": [
+    "a beach cover-up",
+    "a sarong",
+    "a beach kaftan"
+   ]
+  },
+  "homewear": {
+   "pajamas": [
+    "pajamas",
+    "a pajama set"
+   ],
+   "nightgown": [
+    "a nightgown",
+    "a nightdress"
+   ],
+   "robe": [
+    "a bathrobe",
+    "a dressing gown"
+   ],
+   "lounge": [
+    "a loungewear set",
+    "a cozy matching lounge set"
    ]
   }
  },
@@ -295,6 +411,18 @@
   ],
   "tights": [
    "tights"
+  ],
+  "hairacc": [
+   "a hair clip",
+   "a scrunchie",
+   "a hair claw clip"
+  ],
+  "umbrella": [
+   "an umbrella"
+  ],
+  "socks": [
+   "socks",
+   "a pair of socks"
   ]
  },
  "mat": {
