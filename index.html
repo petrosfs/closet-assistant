@@ -60,7 +60,14 @@ nav button.on{color:var(--acc);font-weight:700}
 .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;z-index:20}
 .sheet{background:var(--card);width:100%;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
 .prev{width:100%;max-height:260px;object-fit:contain;border-radius:12px;background:var(--bg);margin-bottom:12px}
-.prevw{position:relative}.prev.pick{max-height:60vh;cursor:crosshair;touch-action:manipulation;outline:2px dashed var(--acc);outline-offset:-2px}
+.prevw{position:relative}
+.gobar{position:sticky;bottom:calc(60px + env(safe-area-inset-bottom));z-index:4;padding:14px 16px 10px;background:linear-gradient(to bottom,transparent,var(--bg) 35%)}
+.gobar .btn{width:100%;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.vimg{width:100%;max-height:52vh;object-fit:contain;border-radius:14px;background:var(--bg);display:block;margin-bottom:12px}
+.vt{font-size:20px;font-weight:700;margin:0 0 4px}
+.kv{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+.kv b{width:96px;flex:none;color:var(--mut);font-weight:500}
+.kv span{flex:1;min-width:0}.prev.pick{max-height:60vh;cursor:crosshair;touch-action:manipulation;outline:2px dashed var(--acc);outline-offset:-2px}
 .eyemk{position:absolute;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px rgba(0,0,0,.6);pointer-events:none}
 .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
 .row>*{flex:1}
@@ -182,7 +189,7 @@ learnTitle:'Εκμάθηση',learnNote:'Κάθε φορά που αποθηκε
 learnStats:(c,k,n,ok)=>`Θυμάμαι ${c} είδη και ${k} διορθώσεις χρώματος.`+(n?` Σωστή πρώτη πρόταση είδους: ${ok} από ${n}.`:''),
 learnReset:'Σβήσε ό,τι έμαθα',learnResetQ:'Θα σβηστούν όσα έχω μάθει από τις επιβεβαιώσεις και τις βαθμολογίες σου. Οι φωτογραφίες και η ντουλάπα σου δεν επηρεάζονται. Συνέχεια;',
 learnedColor:'Το πρότεινα από όσα μου έχεις δείξει πριν.',learnedCat:'Βοήθησαν και όσα έχεις επιβεβαιώσει πριν.',
-back:'Πίσω',subs:{athletic:'Αθλητικά',sneakers:'Sneakers',boots:'Μπότες',ankle:'Μποτάκια',heels:'Τακούνια',platform:'Πλατφόρμες',flats:'Μπαλαρίνες / Flats',sandals:'Σανδάλια / Σαγιονάρες',loafers:'Loafers / Μοκασίνια',mules:'Mules / Σαμπό',espadrilles:'Εσπαντρίγιες',slippers:'Παντόφλες',rainboots:'Γαλότσες',tunic:'Τουνίκ',wraptop:'Κρουαζέ τοπ (wrap)',cargo:'Cargo',palazzo:'Παντελόνα / palazzo',bermuda:'Βερμούδα',skort:'Φούστα-σορτς',parka:'Παρκά',fleece:'Fleece',overshirt:'Overshirt / πουκάμισο-μπουφάν',poncho:'Πόντσο / κάπα',kimono:'Κιμονό / ζακέτα-ρόμπα',fur:'Γούνινο',beret:'Μπερές',bucket:'Bucket hat',headband:'Κορδέλα μαλλιών',wallet:'Πορτοφόλι',suitcase:'Βαλίτσα / ταξιδιωτική',bikini:'Μπικίνι',swimsuit:'Ολόσωμο μαγιό',coverup:'Παρεό / cover-up',pajamas:'Πιτζάμες',nightgown:'Νυχτικό',robe:'Ρόμπα',lounge:'Σετ σπιτιού',tshirt:'T-shirt',longsleeve:'Μακρυμάνικο',tank:'Αμάνικο / Τοπάκι',crop:'Crop top',bustier:'Μπουστάκι / στράπλες',bodysuit:'Κορμάκι',blouse:'Μπλούζα',shirt:'Πουκάμισο',polo:'Polo',sweater:'Πουλόβερ',turtleneck:'Ζιβάγκο',sweatshirt:'Φούτερ crewneck',hoodie:'Φούτερ με κουκούλα',sportstop:'Αθλητικό τοπ',jeans:'Τζιν',trousers:'Παντελόνι',sweatpants:'Φόρμα / joggers',shorts:'Σορτς',skirtmini:'Φούστα κοντή',skirtmidi:'Φούστα μίντι',skirtlong:'Φούστα μακριά',leggings:'Κολάν',dressmini:'Φόρεμα κοντό',dressmidi:'Φόρεμα μίντι',dressmaxi:'Φόρεμα μακρύ',jumplong:'Ολόσωμη μακριά',romper:'Ολόσωμο σορτς',overalls:'Σαλοπέτα',jacket:'Τζάκετ / Μπουφάν',coat:'Παλτό',trench:'Καμπαρντίνα',puffer:'Φουσκωτό μπουφάν',puffercoat:'Φουσκωτό παλτό (μακρύ)',blazer:'Σακάκι',cardigan:'Ζακέτα',vest:'Γιλέκο',raincoat:'Αδιάβροχο / αντιανεμικό',handbag:'Τσάντα χειρός / ώμου',tote:'Τσάντα tote / shopper',crossbody:'Τσάντα χιαστί',backpack:'Σακίδιο πλάτης',clutch:'Clutch / Φάκελος',beltbag:'Τσαντάκι μέσης',cap:'Τζόκεϊ',beanie:'Σκούφος',sunhat:'Καπέλο ήλιου / ψάθινο',fedora:'Ρεπούμπλικα'},subQs:{top:'Τι είδους πάνω μέρος;',bottom:'Τι είδους κάτω μέρος;',dress:'Τι είδους φόρεμα;',jumpsuit:'Τι είδους ολόσωμη;',outer:'Τι είδους εξωτερικό;',shoes:'Τι είδος παπουτσιού;',bag:'Τι είδους τσάντα;',hat:'Τι είδους καπέλο;',swim:'Τι είδους μαγιό;',homewear:'Τι ρούχο σπιτιού;'},patCols:'Χρώματα με μοτίβο',colOpen:'🎨 Αλλαγή χρώματος',colClose:'▴ Κλείσιμο παλέτας',eyeOn:'🎯 Δειγματολήπτης',eyeDone:'✓ Τέλος δειγματοληψίας',eyeHint:'Πάτα πάνω στη φωτογραφία, στο σημείο με το χρώμα που θέλεις. Μπορείς να ξαναπατήσεις σε άλλο σημείο.',eyeHintMulti:'Κάθε πάτημα σε νέο χρώμα το προσθέτει (έως 5).',eyeMiss:'Πάτα πάνω στο ρούχο, όχι στο φόντο.',eyeGot:'Δείγμα',dupNo:'Δεν είναι το ίδιο (θα το θυμάμαι)',
+back:'Πίσω',subs:{athletic:'Αθλητικά',sneakers:'Sneakers',boots:'Μπότες',ankle:'Μποτάκια',heels:'Τακούνια',platform:'Πλατφόρμες',flats:'Μπαλαρίνες / Flats',sandals:'Σανδάλια / Σαγιονάρες',loafers:'Loafers / Μοκασίνια',mules:'Mules / Σαμπό',espadrilles:'Εσπαντρίγιες',slippers:'Παντόφλες',rainboots:'Γαλότσες',tunic:'Τουνίκ',wraptop:'Κρουαζέ τοπ (wrap)',cargo:'Cargo',palazzo:'Παντελόνα / palazzo',bermuda:'Βερμούδα',skort:'Φούστα-σορτς',parka:'Παρκά',fleece:'Fleece',overshirt:'Overshirt / πουκάμισο-μπουφάν',poncho:'Πόντσο / κάπα',kimono:'Κιμονό / ζακέτα-ρόμπα',fur:'Γούνινο',beret:'Μπερές',bucket:'Bucket hat',headband:'Κορδέλα μαλλιών',wallet:'Πορτοφόλι',suitcase:'Βαλίτσα / ταξιδιωτική',bikini:'Μπικίνι',swimsuit:'Ολόσωμο μαγιό',coverup:'Παρεό / cover-up',pajamas:'Πιτζάμες',nightgown:'Νυχτικό',robe:'Ρόμπα',lounge:'Σετ σπιτιού',tshirt:'T-shirt',longsleeve:'Μακρυμάνικο',tank:'Αμάνικο / Τοπάκι',crop:'Crop top',bustier:'Μπουστάκι / στράπλες',bodysuit:'Κορμάκι',blouse:'Μπλούζα',shirt:'Πουκάμισο',polo:'Polo',sweater:'Πουλόβερ',turtleneck:'Ζιβάγκο',sweatshirt:'Φούτερ crewneck',hoodie:'Φούτερ με κουκούλα',sportstop:'Αθλητικό τοπ',jeans:'Τζιν',trousers:'Παντελόνι',sweatpants:'Φόρμα / joggers',shorts:'Σορτς',skirtmini:'Φούστα κοντή',skirtmidi:'Φούστα μίντι',skirtlong:'Φούστα μακριά',leggings:'Κολάν',dressmini:'Φόρεμα κοντό',dressmidi:'Φόρεμα μίντι',dressmaxi:'Φόρεμα μακρύ',jumplong:'Ολόσωμη μακριά',romper:'Ολόσωμο σορτς',overalls:'Σαλοπέτα',jacket:'Τζάκετ / Μπουφάν',coat:'Παλτό',trench:'Καμπαρντίνα',puffer:'Φουσκωτό μπουφάν',puffercoat:'Φουσκωτό παλτό (μακρύ)',blazer:'Σακάκι',cardigan:'Ζακέτα',vest:'Γιλέκο',raincoat:'Αδιάβροχο / αντιανεμικό',handbag:'Τσάντα χειρός / ώμου',tote:'Τσάντα tote / shopper',crossbody:'Τσάντα χιαστί',backpack:'Σακίδιο πλάτης',clutch:'Clutch / Φάκελος',beltbag:'Τσαντάκι μέσης',cap:'Τζόκεϊ',beanie:'Σκούφος',sunhat:'Καπέλο ήλιου / ψάθινο',fedora:'Ρεπούμπλικα'},subQs:{top:'Τι είδους πάνω μέρος;',bottom:'Τι είδους κάτω μέρος;',dress:'Τι είδους φόρεμα;',jumpsuit:'Τι είδους ολόσωμη;',outer:'Τι είδους εξωτερικό;',shoes:'Τι είδος παπουτσιού;',bag:'Τι είδους τσάντα;',hat:'Τι είδους καπέλο;',swim:'Τι είδους μαγιό;',homewear:'Τι ρούχο σπιτιού;'},patCols:'Χρώματα με μοτίβο',foldLess:'▴ Λιγότερα',foldAdd:'＋ Πρόσθεσε',editB:'✎ Επεξεργασία',wantWear:'✨ Πρότεινε συνδυασμό με αυτό',costPer:v=>`Κόστος ανά φορά: ${v}`,priceL:'Τιμή',brandL:'Μάρκα',colOpen:'🎨 Αλλαγή χρώματος',colClose:'▴ Κλείσιμο παλέτας',eyeOn:'🎯 Δειγματολήπτης',eyeDone:'✓ Τέλος δειγματοληψίας',eyeHint:'Πάτα πάνω στη φωτογραφία, στο σημείο με το χρώμα που θέλεις. Μπορείς να ξαναπατήσεις σε άλλο σημείο.',eyeHintMulti:'Κάθε πάτημα σε νέο χρώμα το προσθέτει (έως 5).',eyeMiss:'Πάτα πάνω στο ρούχο, όχι στο φόντο.',eyeGot:'Δείγμα',dupNo:'Δεν είναι το ίδιο (θα το θυμάμαι)',
 navs:{all:'Όλα',top:'👚 Πάνω',bottom:'👖 Κάτω',one:'👗 Φορέματα',outer:'🧥 Εξωτερικά',shoes:'👟 Παπούτσια',home:'🏖️ Μαγιό & σπίτι',acc:'👜 Αξεσουάρ'},
 filtersB:'Φίλτρα',fColor:'Χρώμα',fSeason:'Εποχή',fOcc:'Περίσταση',fPat:'Σχέδιο',fSort:'Ταξινόμηση',sorts:{new:'Νεότερα',old:'Παλαιότερα',most:'Πιο φορεμένα',least:'Λιγότερο φορεμένα'},fClear:'Καθαρισμός φίλτρων',nItems:n=>n===1?'1 είδος':`${n} είδη`,noSub:'Χωρίς είδος',
 detectedN:n=>`Ανίχνευσα ${n} χρώματα:`,onlyFirst:c=>`Μόνο ${c}`,mainCol:'κύριο',multiHint:'Για περισσότερα από ένα χρώματα, διάλεξε πρώτα σχέδιο (π.χ. Ριγέ, Φλοράλ, Πολύχρωμο).',multiOn:'Μπορείς να διαλέξεις έως 5 χρώματα. Το πρώτο είναι το κύριο. Πάτα ξανά σε ένα χρώμα για να το αφαιρέσεις.',
@@ -265,7 +272,7 @@ learnTitle:'Learning',learnNote:'Every time you save or correct an item (type, c
 learnStats:(c,k,n,ok)=>`I remember ${c} items and ${k} colour corrections.`+(n?` First type guess correct: ${ok} of ${n}.`:''),
 learnReset:'Erase what I learned',learnResetQ:'This erases what I learned from your confirmations and ratings. Your photos and closet are not affected. Continue?',
 learnedColor:'Suggested based on what you showed me before.',learnedCat:'What you confirmed before also helped.',
-back:'Back',subs:{athletic:'Athletic shoes',sneakers:'Sneakers',boots:'Boots',ankle:'Ankle boots',heels:'Heels',platform:'Platforms',flats:'Ballet flats / Flats',sandals:'Sandals / Flip-flops',loafers:'Loafers / Moccasins',mules:'Mules / Clogs',espadrilles:'Espadrilles',slippers:'Slippers',rainboots:'Rain boots',tunic:'Tunic',wraptop:'Wrap top',cargo:'Cargo pants',palazzo:'Wide-leg / palazzo',bermuda:'Bermuda shorts',skort:'Skort',parka:'Parka',fleece:'Fleece',overshirt:'Overshirt / shacket',poncho:'Poncho / cape',kimono:'Kimono / duster cardigan',fur:'Fur coat',beret:'Beret',bucket:'Bucket hat',headband:'Headband',wallet:'Wallet',suitcase:'Suitcase / travel bag',bikini:'Bikini',swimsuit:'One-piece swimsuit',coverup:'Cover-up / sarong',pajamas:'Pyjamas',nightgown:'Nightgown',robe:'Robe',lounge:'Lounge set',tshirt:'T-shirt',longsleeve:'Long-sleeve top',tank:'Tank top',crop:'Crop top',bustier:'Bustier / strapless',bodysuit:'Bodysuit',blouse:'Blouse',shirt:'Shirt',polo:'Polo shirt',sweater:'Sweater',turtleneck:'Turtleneck',sweatshirt:'Crewneck sweatshirt',hoodie:'Hoodie',sportstop:'Sports top',jeans:'Jeans',trousers:'Trousers',sweatpants:'Sweatpants / joggers',shorts:'Shorts',skirtmini:'Short skirt',skirtmidi:'Midi skirt',skirtlong:'Long skirt',leggings:'Leggings',dressmini:'Short dress',dressmidi:'Midi dress',dressmaxi:'Long dress',jumplong:'Long jumpsuit',romper:'Romper / playsuit',overalls:'Overalls / dungarees',jacket:'Jacket',coat:'Coat',trench:'Trench coat',puffer:'Puffer jacket',puffercoat:'Puffer coat (long)',blazer:'Blazer',cardigan:'Cardigan',vest:'Vest',raincoat:'Raincoat / windbreaker',handbag:'Handbag',tote:'Tote / shopper',crossbody:'Crossbody bag',backpack:'Backpack',clutch:'Clutch',beltbag:'Belt bag',cap:'Cap',beanie:'Beanie',sunhat:'Sun hat',fedora:'Fedora'},subQs:{top:'What kind of top?',bottom:'What kind of bottom?',dress:'What kind of dress?',jumpsuit:'What kind of jumpsuit?',outer:'What kind of outerwear?',shoes:'What kind of shoes?',bag:'What kind of bag?',hat:'What kind of hat?',swim:'What kind of swimwear?',homewear:'What kind of loungewear?'},patCols:'Pattern colours',colOpen:'🎨 Change colour',colClose:'▴ Close palette',eyeOn:'🎯 Eyedropper',eyeDone:'✓ Done sampling',eyeHint:'Tap the photo where the colour you want is. You can tap again somewhere else.',eyeHintMulti:'Each tap on a new colour adds it (up to 5).',eyeMiss:'Tap on the item, not the background.',eyeGot:'Sample',dupNo:'Not the same (remember this)',
+back:'Back',subs:{athletic:'Athletic shoes',sneakers:'Sneakers',boots:'Boots',ankle:'Ankle boots',heels:'Heels',platform:'Platforms',flats:'Ballet flats / Flats',sandals:'Sandals / Flip-flops',loafers:'Loafers / Moccasins',mules:'Mules / Clogs',espadrilles:'Espadrilles',slippers:'Slippers',rainboots:'Rain boots',tunic:'Tunic',wraptop:'Wrap top',cargo:'Cargo pants',palazzo:'Wide-leg / palazzo',bermuda:'Bermuda shorts',skort:'Skort',parka:'Parka',fleece:'Fleece',overshirt:'Overshirt / shacket',poncho:'Poncho / cape',kimono:'Kimono / duster cardigan',fur:'Fur coat',beret:'Beret',bucket:'Bucket hat',headband:'Headband',wallet:'Wallet',suitcase:'Suitcase / travel bag',bikini:'Bikini',swimsuit:'One-piece swimsuit',coverup:'Cover-up / sarong',pajamas:'Pyjamas',nightgown:'Nightgown',robe:'Robe',lounge:'Lounge set',tshirt:'T-shirt',longsleeve:'Long-sleeve top',tank:'Tank top',crop:'Crop top',bustier:'Bustier / strapless',bodysuit:'Bodysuit',blouse:'Blouse',shirt:'Shirt',polo:'Polo shirt',sweater:'Sweater',turtleneck:'Turtleneck',sweatshirt:'Crewneck sweatshirt',hoodie:'Hoodie',sportstop:'Sports top',jeans:'Jeans',trousers:'Trousers',sweatpants:'Sweatpants / joggers',shorts:'Shorts',skirtmini:'Short skirt',skirtmidi:'Midi skirt',skirtlong:'Long skirt',leggings:'Leggings',dressmini:'Short dress',dressmidi:'Midi dress',dressmaxi:'Long dress',jumplong:'Long jumpsuit',romper:'Romper / playsuit',overalls:'Overalls / dungarees',jacket:'Jacket',coat:'Coat',trench:'Trench coat',puffer:'Puffer jacket',puffercoat:'Puffer coat (long)',blazer:'Blazer',cardigan:'Cardigan',vest:'Vest',raincoat:'Raincoat / windbreaker',handbag:'Handbag',tote:'Tote / shopper',crossbody:'Crossbody bag',backpack:'Backpack',clutch:'Clutch',beltbag:'Belt bag',cap:'Cap',beanie:'Beanie',sunhat:'Sun hat',fedora:'Fedora'},subQs:{top:'What kind of top?',bottom:'What kind of bottom?',dress:'What kind of dress?',jumpsuit:'What kind of jumpsuit?',outer:'What kind of outerwear?',shoes:'What kind of shoes?',bag:'What kind of bag?',hat:'What kind of hat?',swim:'What kind of swimwear?',homewear:'What kind of loungewear?'},patCols:'Pattern colours',foldLess:'▴ Less',foldAdd:'＋ Add',editB:'✎ Edit',wantWear:'✨ Suggest outfits with this',costPer:v=>`Cost per wear: ${v}`,priceL:'Price',brandL:'Brand',colOpen:'🎨 Change colour',colClose:'▴ Close palette',eyeOn:'🎯 Eyedropper',eyeDone:'✓ Done sampling',eyeHint:'Tap the photo where the colour you want is. You can tap again somewhere else.',eyeHintMulti:'Each tap on a new colour adds it (up to 5).',eyeMiss:'Tap on the item, not the background.',eyeGot:'Sample',dupNo:'Not the same (remember this)',
 navs:{all:'All',top:'👚 Tops',bottom:'👖 Bottoms',one:'👗 Dresses',outer:'🧥 Outerwear',shoes:'👟 Shoes',home:'🏖️ Swim & home',acc:'👜 Accessories'},
 filtersB:'Filters',fColor:'Colour',fSeason:'Season',fOcc:'Occasion',fPat:'Pattern',fSort:'Sort',sorts:{new:'Newest',old:'Oldest',most:'Most worn',least:'Least worn'},fClear:'Clear filters',nItems:n=>n===1?'1 item':`${n} items`,noSub:'No type',
 detectedN:n=>`I detected ${n} colours:`,onlyFirst:c=>`Only ${c}`,mainCol:'main',multiHint:'For more than one colour, pick a pattern first (e.g. Striped, Floral, Multicolour).',multiOn:'You can pick up to 5 colours. The first is the main one. Tap a colour again to remove it.',
@@ -1438,7 +1445,7 @@ function suggestView(){
   OCC.map(o=>`<button class="chip ${S.occ===o?'on':''}" data-act="setocc" data-v="${o}">${T.occs[o]}</button>`).join('')+`</div></div>`;
  const mi=S.must&&S.items.find(i=>i.id===S.must);
  h+=`<div class="pad"><div class="lbl">${T.mustQ}</div>`+(mi?
-  `<div style="display:flex;gap:10px;align-items:center"><div style="width:64px;flex:none">${tile(mi)}</div><b style="flex:1">${strip(kind(mi))} · ${cname(mi.color)}${busy(mi)?' · '+T.pats[patOf(mi)]:''}</b><button class="btn sec" style="flex:none;padding:10px 14px" data-act="openmust">${T.change}</button><button class="btn sec" style="flex:none;padding:10px 14px" data-act="clearmust">${T.clearB}</button></div>`
+  `<div style="display:flex;gap:10px;align-items:center"><div style="width:64px;flex:none">${tile(mi)}</div><b style="flex:1">${strip(kind(mi))} · ${cname(mi.color)}${busy(mi)?' · '+T.pats[patOf(mi)]:''}</b></div><div class="chips" style="padding:8px 0 0">${chip(false,'openmust','',T.change)}${chip(false,'clearmust','',T.clearB)}</div>`
   :`<button class="btn sec" data-act="openmust">${T.pickItem}</button>`)+`</div>`;
  h+=`<div class="pad"><div class="lbl">${T.mood}</div><div class="chips" style="padding:0">`+
   ['','comfy','elegant','bold'].map(m=>chip(S.mood===m,'setmood',m,T.moods[m])).join('')+`</div><div class="small" style="margin-top:6px">${T.moodHint}</div></div>`;
@@ -1461,7 +1468,7 @@ function suggestView(){
  h+=`</div>`;
  if(!S.gender)h+=`<div class="pad small">${T.genderHint}</div>`;
  if(PLAN.some(p=>p.d===today()))h+=`<div class="pad small">${T.planTodayMsg}</div>`;
- h+=`<div class="pad"><button class="btn" data-act="go">${S.outfits?T.again:T.go}</button></div>`;
+ h+=`<div id="res"></div>`;
  if(S.msg)h+=`<div class="pad" style="color:var(--mut)">${S.msg}</div>`;
  if(S.outfits)h+=S.outfits.map((o,k)=>`<div class="outfit"><small>${T.reasons[o.reason]}</small><div class="pieces">`+
   [...o.main,...o.acc].map(i=>`<div class="piece">${tile(i)}${strip(kind(i))}<span>${cname(i.color)}${busy(i)?' · '+T.pats[patOf(i)]:''}</span></div>`).join('')+`</div>
@@ -1471,6 +1478,7 @@ function suggestView(){
  if(fl.length)h+=`<div class="pad"><div class="lbl">${T.favTitle}</div></div>`+fl.map(x=>`<div class="outfit"><div class="pieces">`+
   x.items.map(i=>`<div class="piece">${tile(i)}${strip(kind(i))}<span>${cname(i.color)}</span></div>`).join('')+`</div>
   <div class="row" style="margin-top:8px"><button class="btn sec" data-act="wofav" data-v="${x.idx}">${T.woreIt}</button><button class="btn sec" data-act="favdel" data-v="${x.idx}">${T.favDel}</button><button class="btn sec" data-act="planopen" data-v="f${x.idx}">${T.planBtn}</button></div></div>`).join('');
+ h+=`<div class="gobar"><button class="btn" data-act="go">${S.outfits?T.again:T.go}</button></div>`;
  return h}
 function render(){
  document.documentElement.lang=LANG;T=I18N[LANG];applyTheme();
@@ -1509,6 +1517,11 @@ function panelHtml(){
   <div class="lbl">${T.learnTitle}</div><div class="small">${T.learnNote}</div><div class="small" style="margin-top:6px">${T.learnStats(LEARN.cat.length,LEARN.col.length,LEARN.st.n,LEARN.st.ok)}</div>
   <div class="row"><button class="btn sec" data-act="resetlearn" ${LEARN.cat.length||LEARN.col.length||LEARN.st.n||RATE.length||LEARN.dup.neg.length||LEARN.dup.pairs.length||Object.keys(LEARN.dup.weak).length?'':'disabled'}>${T.learnReset}</button></div>
   <div class="row"><button class="btn sec" data-act="close">${T.close}</button></div>`}
+/* A form section that shows only what is chosen; tapping it opens all the options (open by itself while nothing is chosen, when need=true). */
+function fold(d,k,lbl,picked,need,body){
+ const fo=d.fo||{},open=fo[k]!==undefined?fo[k]:need;
+ if(open)return `<div class="lbl">${lbl}</div><div class="chips">${body}</div>`+(picked.length?`<div class="chips" style="margin-top:-4px">${chip(false,'fold',k,T.foldLess)}</div>`:'');
+ return `<div class="lbl">${lbl}</div><div class="chips">`+(picked.length?picked.map(p=>chip(true,'fold',k,p)).join('')+chip(false,'fold',k,'✎ '+T.change):chip(false,'fold',k,T.foldAdd))+`</div>`}
 function draftHtml(){
  const d=draft;
  let h=`<h2>${d.id?T.edit:T.addTitle}</h2>`;
@@ -1520,6 +1533,7 @@ function draftHtml(){
   else h+=`<div class="chips" style="padding:0 0 10px">`+(d.cut&&d.orig?chip(false,'uncut','',T.bgUndo):d.cut?'':chip(false,'cut','',T.bgDo))+`</div>`+(d.cutErr?`<div class="small" style="margin:-4px 0 10px">${d.cutErr==='load'?T.bgLoadErr:T.bgFail}</div>`:'');
  }
  const skip=qTotal>1&&!d.id?`<button class="btn sec" data-act="skip">${T.skipB}</button>`:'';
+ if(d.phase==='view')return viewHtml(d);
  const back=d.hist&&d.hist.length&&!d.id?`<button class="btn sec" data-act="back">${T.back}</button>`:'';
  if(d.phase==='photo'){
   if(d.busy)h+=`<div class="lbl">${T.processing}</div>`;
@@ -1570,9 +1584,9 @@ function draftHtml(){
    if(g==='acc'&&d.cat==='jewelry')ks=[...ks,'jewelry'];
    return `<div class="lbl" style="margin:4px 0 6px"><b>${T[g]}</b></div><div class="chips">`+
     ks.map(k=>chip(d.cat===k,'cat',k,`${EMOJI[k]} ${T.cats[k]}`)).join('')+`</div>`}).join('');
-  if(SUBT[d.cat])h+=`<div class="lbl">${T.subQs[d.cat]}</div><div class="chips">`+SUBT[d.cat].map(k=>chip(d.sub===k,'sub',k,T.subs[k])).join('')+`</div>`;
+  if(SUBT[d.cat])h+=fold(d,'sub',T.subQs[d.cat],d.sub?[T.subs[d.sub]]:[],!d.sub,SUBT[d.cat].map(k=>chip(d.sub===k,'sub',k,T.subs[k])).join(''));
   // 2. pattern, then colours (a patterned piece can have several)
-  h+=`<div class="lbl">${T.patQ}${st('pat')}</div><div class="chips">`+PATS.map(k=>chip(patOf(d)===k,'pat',k,T.pats[k])).join('')+`</div>`;
+  h+=fold(d,'pat',T.patQ+st('pat'),[T.pats[patOf(d)]],false,PATS.map(k=>chip(patOf(d)===k,'pat',k,T.pats[k])).join(''));
   const cl=d.color?colsOf(d).filter(c=>own(P,c)):[],wide=S.pal||cl.some(c=>own(PX,c)),openC=!cl.length||d.openCol;
   h+=`<div class="lbl">${T.pickColor}</div>`;
   if(cl.length)h+=`<div class="sel">`+cl.map((c,j)=>`<span class="selc"><i style="background:${P[c][0]}"></i>${esc(cname(c))}${j===0&&cl.length>1?` <small>(${T.mainCol})</small>`:''}${cl.length>1?`<button class="lnk" data-act="color" data-v="${c}" aria-label="✕">✕</button>`:''}</span>`).join('')+`</div>`;
@@ -1589,10 +1603,10 @@ function draftHtml(){
    `<div class="chips" style="padding:0 0 4px">${chip(S.pal,'togglepal','',S.pal?T.palBasic:T.palMore)}</div>`+
    `<div class="small" style="margin:2px 0 4px">${T.patCols}</div><div class="palette wide">`+PAT_COLS.map(sw).join('')+`</div>`;
   // 3. fabric, occasions, seasons
-  h+=`<div class="lbl">${T.matQ}${st('mat')}</div><div class="chips">`+MATS.map(k=>chip(d.mat===k,'mat',k,T.mats[k])).join('')+`</div>`;
+  h+=fold(d,'mat',T.matQ+st('mat'),d.mat?[T.mats[d.mat]]:[],false,MATS.map(k=>chip(d.mat===k,'mat',k,T.mats[k])).join(''));
   const occ=occOf(d),sn=ssnOf(d);
-  h+=`<div class="lbl">${T.occQ}${st('occ')}</div><div class="chips">`+OCC.map(o=>chip(occ.includes(o),'occ',o,T.occs[o])).join('')+`</div>`;
-  h+=`<div class="lbl">${T.seasonQ}${st('ssn')}</div><div class="chips">`+chip(!sn.length||sn.length===4,'ssn','all',T.ssns.all)+SSN.map(k=>chip(sn.length<4&&sn.includes(k),'ssn',k,T.ssns[k])).join('')+`</div>`;
+  h+=fold(d,'occ',T.occQ+st('occ'),occ.map(o=>T.occs[o]),false,OCC.map(o=>chip(occ.includes(o),'occ',o,T.occs[o])).join(''));
+  h+=fold(d,'ssn',T.seasonQ+st('ssn'),!sn.length||sn.length===4?[T.ssns.all]:sn.map(k=>T.ssns[k]),false,chip(!sn.length||sn.length===4,'ssn','all',T.ssns.all)+SSN.map(k=>chip(sn.length<4&&sn.includes(k),'ssn',k,T.ssns[k])).join(''));
   // 4. optional details open on demand
   h+=`<div class="lbl">${T.optQ}</div>`;
   {const ob=d.openBrand||d.brand,op=d.openPrice||d.price;
@@ -1607,6 +1621,20 @@ function draftHtml(){
    h+=`<div class="small" style="margin-top:12px">${n?T.wornN(n,esc(fmtDate(lastWorn(d)))):T.wornNever}</div><div class="row"><button class="btn sec" data-act="wearitem">${T.wearToday}</button></div>`;
    h+=`<div class="row"><button class="btn danger" data-act="del">${T.del}</button></div>`}
  }
+ return h}
+// An item as it is: big photo and its details; editing is one tap away.
+function viewHtml(d){
+ const cl=colsOf(d).filter(c=>own(P,c)),occ=occOf(d),sn=ssnOf(d),n=wearsOf(d);
+ let h=d.img?`<img class="vimg${d.cut?' cut':''}" src="${d.img}" alt="">`:`<div style="font-size:72px;text-align:center;padding:20px;background:${P[d.color][0]};border-radius:14px;margin-bottom:12px">${EMOJI[d.cat]}</div>`;
+ h+=`<div class="vt">${EMOJI[d.cat]} ${esc(strip(kind(d)))}</div>`;
+ h+=`<div class="sel" style="margin:8px 0 6px">`+cl.map(c=>`<span class="selc"><i style="background:${P[c][0]}"></i>${esc(cname(c))}</span>`).join('')+`</div>`;
+ const kv=(k,v)=>v?`<div class="kv"><b>${k}</b><span>${v}</span></div>`:'';
+ h+=kv(T.fPat,busy(d)?T.pats[patOf(d)]:'')+kv(strip(T.matQ.replace(/\s*\(.*\)/,'')),d.mat?T.mats[d.mat]:'')+kv(T.fOcc,occ.map(o=>T.occs[o]).join(', '))+kv(T.fSeason,sn.length&&sn.length<4?sn.map(x=>strip(T.ssns[x])).join(', '):T.ssns.all)+
+  kv(T.brandL,d.brand?esc(d.brand):'')+kv(T.priceL,d.price?money(d.price):'');
+ h+=`<div class="small" style="margin:10px 0 2px">${n?T.wornN(n,esc(fmtDate(lastWorn(d)))):T.wornNever}${d.price&&n?' · '+T.costPer(money(d.price/n)):''}</div>`;
+ h+=`<div class="row"><button class="btn" data-act="wantwear">${T.wantWear}</button></div>
+ <div class="row"><button class="btn sec" data-act="wearitem">${T.woreIt}</button><button class="btn sec" data-act="editview">${T.editB}</button></div>
+ <div class="row"><button class="btn sec" data-act="close">${T.close}</button></div>`;
  return h}
 function sheet(){
  const el=$('#sheet');
@@ -1729,7 +1757,9 @@ document.addEventListener('click',async e=>{
  else if(a==='noloc'){S.loc=null;S.wxAll=null;S.wxErr='';S.editLoc=false;ls.del('loc');S.outfits=null;render()}
  else if(a==='retry'){S.wxErr='';render();await loadWx();render()}
  else if(a==='fab'){queue=[];qTotal=0;qIndex=0;draft=newDraft();sheet()}
- else if(a==='item'){const i=S.items.find(x=>x.id===v);if(i){draft={...i,phase:'form'};sheet()}}
+ else if(a==='item'){const i=S.items.find(x=>x.id===v);if(i){draft={...i,phase:'view'};sheet()}}
+ else if(a==='editview'){if(draft){draft.phase='form';sheet();const el=$('.sheet');if(el)el.scrollTop=0}}
+ else if(a==='wantwear'){if(draft&&draft.id){S.must=draft.id;S.outfits=null;draft=null;S.tab='suggest';sheet();render();window.scrollTo(0,0)}}
  else if(a==='nophoto'){go('form');sheet()}
  else if(a==='yes'||a==='yes1'){const dc=draft.detCols&&draft.detCols.length?draft.detCols:[draft.det];draft.color=dc[0];draft.cols=a==='yes'?dc.slice(1,5):[];afterColor();sheet()}
  else if(a==='no'){afterColor();sheet()}
@@ -1739,7 +1769,7 @@ document.addEventListener('click',async e=>{
  else if(a==='subyes'){draft.sub=draft.subGuess[draft.cat][0].id;go('form');sheet()}
  else if(a==='subno'){go('form');sheet()}
  else if(a==='picksub'){draft.sub=v;go('form');sheet()}
- else if(a==='sub'){draft.sub=draft.sub===v?null:v;autoFill(draft);sheet()}
+ else if(a==='sub'){draft.sub=draft.sub===v?null:v;(draft.fo||(draft.fo={})).sub=!draft.sub;autoFill(draft);sheet()}
  else if(a==='subfilter'){S.subF=v;render()}
  else if(a==='back'){const d=draft;if(d&&d.hist&&d.hist.length){const prev=d.hist.pop();if(prev==='confirm'){d.color=null;d.cols=[]}if(prev==='confirm'||prev==='confirmcat')d.cat=null;if(prev!=='form')d.sub=null;d.phase=prev;sheet()}}
  else if(a==='skip'){advance()}
@@ -1765,6 +1795,7 @@ document.addEventListener('click',async e=>{
   d.openCol=busy(d)?open:false; // a plain piece has its colour now: the palette folds away
   sheet()}
  else if(a==='opencol'){draft.openCol=!draft.openCol;sheet()}
+ else if(a==='fold'){const d=draft;if(!d)return;const fo=d.fo||(d.fo={});const cur=fo[v]!==undefined?fo[v]:(v==='sub'&&!d.sub);fo[v]=!cur;sheet()}
  else if(a==='eye'){const d=draft;d.picking=!d.picking;d.eyeMsg=null;if(d.picking)d.openCol=false;else d.eye=null;sheet();
   const im=$('.prev.pick');if(im&&im.scrollIntoView)im.scrollIntoView({block:'center'})}
  else if(a==='eyetap'){
@@ -1776,13 +1807,13 @@ document.addEventListener('click',async e=>{
   if(!busy(d)&&!d.id){d.lab=r.lab;d.det=r.id;d.auto=S.pal?r.id:suggestColor(r.lab).auto}
   setCol(d,r.id,true);sheet()}
  else if(a==='opencat'){draft.openCat=!draft.openCat;sheet()}
- else if(a==='cat'){draft.cat=v;draft.openCat=false;if(!subOk(v,draft.sub))draft.sub=null;autoFill(draft);sheet()}
+ else if(a==='cat'){draft.cat=v;draft.openCat=false;if(!subOk(v,draft.sub)){draft.sub=null;if(draft.fo)delete draft.fo.sub}autoFill(draft);sheet()}
  else if(a==='ssn'){
   const d=draft,cur=ssnOf(d);let n;
   if(v==='all')n=[...SSN];else if(SSN.includes(v)){const base=cur.length===4?[]:cur;n=base.includes(v)?base.filter(x=>x!==v):SSN.filter(x=>base.includes(x)||x===v)}else return;
   d.ssn=n;delete d.season;(d.touched||(d.touched={})).ssn=1;if(d.autoF)delete d.autoF.ssn;sheet()}
- else if(a==='pat'){if(PATS.includes(v)){const d=draft;d.pat=v;(d.touched||(d.touched={})).pat=1;if(d.autoF)delete d.autoF.pat;if(v==='solid')d.cols=[];sheet()}}
- else if(a==='mat'){if(MATS.includes(v)){const d=draft;d.mat=d.mat===v?undefined:v;(d.touched||(d.touched={})).mat=1;if(d.autoF)delete d.autoF.mat;autoFill(d);sheet()}}
+ else if(a==='pat'){if(PATS.includes(v)){const d=draft;d.pat=v;(d.touched||(d.touched={})).pat=1;if(d.autoF)delete d.autoF.pat;if(v==='solid')d.cols=[];(d.fo||(d.fo={})).pat=false;sheet()}}
+ else if(a==='mat'){if(MATS.includes(v)){const d=draft;d.mat=d.mat===v?undefined:v;(d.touched||(d.touched={})).mat=1;if(d.autoF)delete d.autoF.mat;(d.fo||(d.fo={})).mat=false;autoFill(d);sheet()}}
  else if(a==='openbrand'||a==='openprice'){draft[a==='openbrand'?'openBrand':'openPrice']=true;sheet();const el=$(a==='openbrand'?'#brand':'#price');if(el)el.focus()}
  else if(a==='wearitem'){await wearOutfit([draft]);const it=S.items.find(x=>x.id===draft.id);if(it)draft.w=it.w;sheet()}
  else if(a==='wore'||a==='wofav'){
@@ -1825,7 +1856,7 @@ document.addEventListener('click',async e=>{
   const must=S.must&&S.items.find(i=>i.id===S.must)||null;
   const r=plan(S.items,S.occ,curWx(),S.outer,S.mood,must,S.day);
   S.outfits=r.outfits;S.msg=r.msgs.map(k=>T[k]).join(' ');
-  render();
+  render();const res=$('#res');if(res&&res.scrollIntoView)res.scrollIntoView({behavior:'smooth',block:'start'});
  }
 });
 document.addEventListener('input',e=>{
