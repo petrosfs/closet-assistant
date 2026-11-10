@@ -9,6 +9,23 @@
 :root{--bg:#faf7fb;--card:#fff;--ink:#241b2b;--mut:#7a6d84;--acc:#7b4b94;--line:#e8e0ed;--r:16px;color-scheme:light}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#171219;--card:#241d28;--ink:#f3edf6;--mut:#a99bb3;--acc:#c79be0;--line:#3a3042;color-scheme:dark}}
 :root[data-theme=dark]{--bg:#171219;--card:#241d28;--ink:#f3edf6;--mut:#a99bb3;--acc:#c79be0;--line:#3a3042;color-scheme:dark}
+/* skins: a (default, purple), b (warm, serif), c (minimal black & white); each with its own dark variant */
+:root[data-skin=b]{--bg:#f6f3ee;--card:#fffdf9;--ink:#2b2622;--mut:#8a7f74;--acc:#b5654a;--line:#e9e1d6;--r:20px}
+@media(prefers-color-scheme:dark){:root[data-skin=b]:not([data-theme=light]){--bg:#1b1714;--card:#27211c;--ink:#f2ebe3;--mut:#a89a8c;--acc:#dc8d6e;--line:#3b322b;--r:20px;color-scheme:dark}}
+:root[data-skin=b][data-theme=dark]{--bg:#1b1714;--card:#27211c;--ink:#f2ebe3;--mut:#a89a8c;--acc:#dc8d6e;--line:#3b322b;--r:20px;color-scheme:dark}
+:root[data-skin=c]{--bg:#ffffff;--card:#f4f4f6;--ink:#111114;--mut:#6e6e78;--acc:#111114;--onacc:#fff;--line:#e4e4ea;--r:12px}
+@media(prefers-color-scheme:dark){:root[data-skin=c]:not([data-theme=light]){--bg:#0e0e10;--card:#1c1c20;--ink:#f4f4f6;--mut:#9a9aa4;--acc:#ececf0;--onacc:#111114;--line:#2e2e34;--r:12px;color-scheme:dark}}
+:root[data-skin=c][data-theme=dark]{--bg:#0e0e10;--card:#1c1c20;--ink:#f4f4f6;--mut:#9a9aa4;--acc:#ececf0;--onacc:#111114;--line:#2e2e34;--r:12px;color-scheme:dark}
+:root[data-skin=b] body{font-family:Georgia,"Iowan Old Style","Times New Roman",serif}
+:root[data-skin=b] .chip,:root[data-skin=b] .btn,:root[data-skin=b] input,:root[data-skin=b] nav button{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+:root[data-skin=b] h1{letter-spacing:.5px;font-weight:600}
+:root[data-skin=b] .tile{border:0;box-shadow:0 2px 10px rgba(60,40,20,.10)}
+:root[data-skin=b] nav{border-top:0;box-shadow:0 -4px 18px rgba(60,40,20,.10)}
+:root[data-skin=b] .sheet{border-radius:28px 28px 0 0}
+:root[data-skin=c] body{font-family:"Helvetica Neue",Arial,sans-serif}
+:root[data-skin=c] h1{text-transform:uppercase;letter-spacing:3px;font-size:16px}
+:root[data-skin=c] .chip{border-radius:8px}:root[data-skin=c] .btn{border-radius:10px}:root[data-skin=c] .tile{border:0}
+:root[data-skin=c] .btn:not(.sec):not(.danger),:root[data-skin=c] .chip.on{color:var(--onacc)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;position:sticky;top:0;background:var(--bg);z-index:5}
@@ -155,7 +172,7 @@ importErr:'Το αρχείο δεν είναι έγκυρο αντίγραφο.'
 confirmImport:n=>`Να προστεθούν ${n} κομμάτια από το αρχείο; Τα υπάρχοντα δεν διαγράφονται.`,
 importOk:n=>`Προστέθηκαν ${n} κομμάτια.`,
 menu:'Μενού',profile:'Προφίλ',settings:'Ρυθμίσεις',lang:'Γλώσσα',theme:'Εμφάνιση',
-themes:{auto:'Αυτόματο',light:'Φωτεινό',dark:'Σκοτεινό'},
+themes:{auto:'Αυτόματο',light:'Φωτεινό',dark:'Σκοτεινό'},skinQ:'Στυλ',skins:{auto:'Αυτόματο (από το φύλο)',a:'Μωβ',b:'Ζεστό / κομψό',c:'Μινιμαλ ασπρόμαυρο'},
 gender:'Φύλο',genders:{female:'Γυναίκα',male:'Άνδρας',other:'Άλλο / δεν θέλω να πω'},
 genderNote:'Χρησιμοποιείται μόνο για να προσαρμόζεται η λίστα κατηγοριών. Μένει στη συσκευή σου.',
 genderHint:'Διάλεξε φύλο στο Προφίλ για πιο στοχευμένες κατηγορίες.',
@@ -238,7 +255,7 @@ importErr:'This file is not a valid backup.',
 confirmImport:n=>`Add ${n} items from the file? Existing items are not deleted.`,
 importOk:n=>`Added ${n} items.`,
 menu:'Menu',profile:'Profile',settings:'Settings',lang:'Language',theme:'Appearance',
-themes:{auto:'Automatic',light:'Light',dark:'Dark'},
+themes:{auto:'Automatic',light:'Light',dark:'Dark'},skinQ:'Style',skins:{auto:'Automatic (from gender)',a:'Purple',b:'Warm / elegant',c:'Minimal black & white'},
 gender:'Gender',genders:{female:'Woman',male:'Man',other:'Other / prefer not to say'},
 genderNote:'Only used to adapt the list of categories. It stays on your device.',
 genderHint:'Pick a gender in Profile for more fitting categories.',
@@ -444,6 +461,7 @@ const ls={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:
 const own=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let LANG=ls.get('lang');if(!own(I18N,LANG))LANG='el';
+let SKIN=ls.get('skin')||'auto';if(!['auto','a','b','c'].includes(SKIN))SKIN='auto';
 let THEME=ls.get('theme');if(!['auto','light','dark'].includes(THEME))THEME='auto';
 let T=I18N[LANG];
 function cleanFav(a){const seen=new Set(),out=[];
@@ -493,7 +511,10 @@ let draft=null,panel=null;
 let queue=[],qTotal=0,qIndex=0; // photos picked together are reviewed one after another
 const $=s=>document.querySelector(s);
 const cname=id=>P[id][LANG==='el'?3:4];
-function applyTheme(){const r=document.documentElement;if(!r||!r.dataset)return;if(THEME==='auto')delete r.dataset.theme;else r.dataset.theme=THEME}
+function applyTheme(){const r=document.documentElement;if(!r||!r.dataset)return;
+ // automatic skin: purple for women and unset, warm for men
+ const sk=SKIN==='auto'?(S.gender==='male'?'b':'a'):SKIN;if(sk==='a')delete r.dataset.skin;else r.dataset.skin=sk;
+ const mc=document.querySelector('meta[name=theme-color]');if(mc)mc.content=({a:'#7b4b94',b:'#b5654a',c:'#111114'})[sk];if(THEME==='auto')delete r.dataset.theme;else r.dataset.theme=THEME}
 
 /* ---------- storage ----------
    Data lives in IndexedDB (name 'closet', store 'items') on this site's address.
@@ -1510,7 +1531,8 @@ function panelHtml(){
  return `<h2>⚙️ ${T.settings}</h2><div class="lbl">${T.lang}</div><div class="chips">`+
   [['el','Ελληνικά'],['en','English']].map(([k,n])=>chip(LANG===k,'setlang',k,n)).join('')+
   `</div><div class="lbl">${T.theme}</div><div class="chips">`+
-  ['auto','light','dark'].map(k=>chip(THEME===k,'settheme',k,T.themes[k])).join('')+
+  ['auto','light','dark'].map(k=>chip(THEME===k,'settheme',k,T.themes[k])).join('')+`</div><div class="lbl">${T.skinQ}</div><div class="chips">`+
+  ['auto','a','b','c'].map(k=>chip(SKIN===k,'setskin',k,T.skins[k])).join('')+
   `</div><div class="lbl">${T.palName}</div><div class="chips">${chip(S.pal,'togglepal','',S.pal?T.on:T.off)}</div><div class="small">${T.palNote}</div>
   <div class="lbl">${T.bgName}</div><div class="chips">${chip(S.bg,'togglebg','',S.bg?T.on:T.off)}</div><div class="small">${T.bgNote}</div>${S.bg&&BG.p&&!BG.ready?`<div class="small">${T.mlDownloading(BG.pct)}</div>`:''}
   <div class="lbl">${T.mlName}</div><div class="chips">${chip(S.ml,'toggleml','',S.ml?T.on:T.off)}</div><div class="small">${T.mlNote}</div>
@@ -1732,6 +1754,7 @@ document.addEventListener('click',async e=>{
  else if(a==='export'){S.menu=false;exportData();render()}
  else if(a==='setlang'){LANG=v;ls.set('lang',v);render()}
  else if(a==='settheme'){THEME=v;ls.set('theme',v);render()}
+ else if(a==='setskin'){SKIN=v;ls.set('skin',v);render()}
  else if(a==='setgender'){S.gender=v;ls.set('gender',v);render()}
  else if(a==='tab'){S.tab=v;render();
   if(v==='suggest'&&S.loc&&(!S.wxAll||Date.now()-S.wxT>36e5)){await loadWx();render()}}
