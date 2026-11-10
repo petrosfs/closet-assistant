@@ -53,7 +53,7 @@ arr=np.zeros((len(SX),4),dtype=np.uint8)
 for i,(x,l) in enumerate(zip(SX,SY)):arr[i]=[int(round(np.clip(x[0],0,100)*2.55)),int(round(np.clip(x[1],-128,127)+128)),int(round(np.clip(x[2],-128,127)+128)),BASE.index(l)]
 M['col']=b64(arr);metrics['colour_examples']=len(SX)
 # ---- starter examples: the 20 sample photos
-UL=[('bag','handbag'),('bag','handbag'),('top','polo'),('bottom','jeans'),('top','crop'),('top','sweater'),('top','sweater'),('top','tank'),('outer','coat'),('outer','puffer'),('outer','puffer'),('outer','puffer'),('belt',None),('bottom','skirtmidi'),('bottom','skirtlong'),('bag','backpack'),('dress','dressmaxi'),('dress','dressmidi'),('dress','dressmaxi'),('sunglasses',None)]
+UL=[('bag','handbag'),('bag','handbag'),('top','polo'),('bottom','jeans'),('top','crop'),('top','sweater'),('top','sweater'),('top','tank'),('outer','coat'),('outer','puffer'),('outer','puffercoat'),('outer','puffer'),('belt',None),('bottom','skirtmidi'),('bottom','skirtlong'),('bag','backpack'),('dress','dressmaxi'),('dress','dressmidi'),('dress','dressmaxi'),('sunglasses',None)]
 UPAT={7:'stripes',15:'floral',17:'animal'};UMAT={1:'leather',2:'leather',13:'leather',16:'leather',4:'denim',6:'knit',7:'knit',9:'wool',10:'synthetic',11:'synthetic',12:'synthetic',18:'velvet',19:'satin'}
 seeds=[]
 for i,(c,s) in enumerate(UL):
@@ -63,5 +63,7 @@ for i,(c,s) in enumerate(UL):
     if i+1 in UMAT:o['m']=UMAT[i+1]
     seeds.append(o)
 M['seeds']=seeds
+# hand-set offsets for sub-types the datasets have no labels for (checked on the sample photos)
+M['off'].update({'puffercoat':-1.0})
 json.dump(M,open(W+'/model.json','w'),separators=(',',':'));json.dump(metrics,open(W+'/metrics.json','w'),indent=1)
 print(json.dumps(metrics,indent=1));print('offsets',M['off'],'matthr',M['matthr'],'model bytes',os.path.getsize(W+'/model.json'))

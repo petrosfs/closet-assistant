@@ -143,9 +143,16 @@
     "a trench coat"
    ],
    "puffer": [
+    "a short puffer jacket",
     "a puffer jacket",
     "a down jacket",
-    "a padded winter coat"
+    "a cropped puffer jacket"
+   ],
+   "puffercoat": [
+    "a long puffer coat",
+    "a long down coat",
+    "a knee-length quilted puffer coat",
+    "a long padded winter coat"
    ],
    "blazer": [
     "a blazer"

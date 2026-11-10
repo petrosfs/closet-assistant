@@ -34,7 +34,7 @@ def load_cc0():
 CC0_CAT={'dress':'dress','hat':'hat','longsleeve':'top','outwear':'outer','pants':'bottom','shirt':'top','shoes':'shoes','shorts':'bottom','skirt':'bottom','t-shirt':'top'}
 def load_user():
     files=open(EV+'/files.txt').read().split('\n');d=json.load(open(EV+'/imgs.json'));E=np.array([d[f] for f in files],dtype=np.float32)
-    truth=[('bag',{'handbag','tote'}),('bag',{'handbag','tote'}),('top',{'polo','tshirt'}),('bottom',{'jeans','trousers'}),('top',{'crop','tank'}),('top',{'sweater'}),('top',{'sweater'}),('top',{'tank','crop','bustier'}),('outer',{'coat','jacket'}),('outer',{'puffer'}),('outer',{'puffer','coat'}),('outer',{'puffer'}),('belt',None),('bottom',{'skirtmidi'}),('bottom',{'skirtlong'}),('bag',{'backpack'}),('dress',{'dressmaxi'}),('dress',{'dressmidi'}),('dress',{'dressmaxi','dressmidi'}),('sunglasses',None)]
+    truth=[('bag',{'handbag','tote'}),('bag',{'handbag','tote'}),('top',{'polo','tshirt'}),('bottom',{'jeans','trousers'}),('top',{'crop','tank'}),('top',{'sweater'}),('top',{'sweater'}),('top',{'tank','crop','bustier'}),('outer',{'coat','jacket'}),('outer',{'puffer'}),('outer',{'puffercoat'}),('outer',{'puffer'}),('belt',None),('bottom',{'skirtmidi'}),('bottom',{'skirtlong'}),('bag',{'backpack'}),('dress',{'dressmaxi'}),('dress',{'dressmidi'}),('dress',{'dressmaxi','dressmidi'}),('sunglasses',None)]
     return files,E,truth
 def zs_g(E,labels,g=0.0,T=100.0):
     """log-sum-exp over a label's prompts minus g*log(n): g=0 is the plain sum, g=1 the mean."""

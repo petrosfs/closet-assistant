@@ -2,7 +2,7 @@ import os,sys;sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from data import *
 from sklearn.linear_model import LogisticRegression
 GROUPS={'top':{'tshirt':['tshirt','longsleeve'],'polo':['polo'],'tank':['tank','bodysuit','bustier','sportstop'],'blouse':['blouse'],'shirt':['shirt'],'sweater':['sweater','sweatshirt'],'turtleneck':['turtleneck'],'hoodie':['hoodie'],'crop':['crop']},
- 'outer':{'cardigan':['cardigan'],'blazer':['blazer'],'jacket':['jacket','coat','trench','puffer','vest','raincoat']},
+ 'outer':{'cardigan':['cardigan'],'blazer':['blazer'],'jacket':['jacket','coat','trench','puffer','puffercoat','vest','raincoat']},
  'bottom':{'pants':['jeans','trousers','sweatpants','leggings'],'shorts':['shorts'],'skirt':['skirtmini','skirtmidi','skirtlong']}}
 DATA={'top':TOP,'outer':OUTER,'bottom':BOTTOM}
 def zl(E,prompts,bias):return np.max(np.stack([100*E@tv(p)-bias.get(p,0.0) for p in prompts],1),1)
