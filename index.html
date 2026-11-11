@@ -176,6 +176,7 @@ themes:{auto:'Αυτόματο',light:'Φωτεινό',dark:'Σκοτεινό'},
 gender:'Φύλο',genders:{female:'Γυναίκα',male:'Άνδρας',other:'Άλλο / δεν θέλω να πω'},
 genderNote:'Χρησιμοποιείται μόνο για να προσαρμόζεται η λίστα κατηγοριών. Μένει στη συσκευή σου.',
 genderHint:'Διάλεξε φύλο στο Προφίλ για πιο στοχευμένες κατηγορίες.',
+age:'Ηλικία',ages:{u13:'Κάτω από 13','13-17':'13–17','18-29':'18–29','30-44':'30–44','45-59':'45–59','60+':'60+'},ageOn:'Η ηλικία επηρεάζει τις προτάσεις',ageNote:'Κάτω από 13: χωρίς ψηλά τακούνια, πλατφόρμες και κοσμήματα. 45+: λίγο λιγότερα crop top, μπουστάκια και μίνι. 60+: και λιγότερα ψηλά τακούνια. Μένει στη συσκευή σου.',
 where:'Τοποθεσία (για τον καιρό)',cityPh:'Πόλη, π.χ. Αθήνα',searchB:'Αναζήτηση',change:'Αλλαγή',noLoc:'Χωρίς καιρό',
 today:'Σήμερα',tomorrow:'Αύριο',retry:'Δοκίμασε ξανά',
 wxFail:'Δεν μπόρεσα να φέρω στοιχεία. Έλεγξε τη σύνδεση.',noCity:'Δεν βρέθηκε πόλη.',
@@ -259,6 +260,7 @@ themes:{auto:'Automatic',light:'Light',dark:'Dark'},skinQ:'Style',skins:{auto:'A
 gender:'Gender',genders:{female:'Woman',male:'Man',other:'Other / prefer not to say'},
 genderNote:'Only used to adapt the list of categories. It stays on your device.',
 genderHint:'Pick a gender in Profile for more fitting categories.',
+age:'Age',ages:{u13:'Under 13','13-17':'13–17','18-29':'18–29','30-44':'30–44','45-59':'45–59','60+':'60+'},ageOn:'Age affects suggestions',ageNote:'Under 13: no high heels, platforms or jewellery. 45+: slightly fewer crop tops, bustiers and minis. 60+: also fewer high heels. It stays on your device.',
 where:'Location (for the weather)',cityPh:'City, e.g. Athens',searchB:'Search',change:'Change',noLoc:'No weather',
 today:'Today',tomorrow:'Tomorrow',retry:'Try again',
 wxFail:'Could not fetch data. Check your connection.',noCity:'No city found.',
@@ -504,8 +506,10 @@ function cleanPlan(a){const m=new Map();
 let PLAN=(()=>{try{return cleanPlan(JSON.parse(ls.get('plan'))).filter(p=>p.d>=today())}catch(e){return []}})();
 const savePlan=()=>ls.set('plan',JSON.stringify(PLAN));
 function loadLoc(){try{const o=JSON.parse(ls.get('loc'));if(o&&typeof o.name==='string'&&Number.isFinite(o.lat)&&Number.isFinite(o.lon))return {name:o.name,lat:o.lat,lon:o.lon,mine:o.mine===true}}catch(e){}return null}
+const AGES=['u13','13-17','18-29','30-44','45-59','60+'];
 const S={tab:'closet',nav:'all',subF:'',fx:{col:'',ssn:'',occ:'',pat:'',sort:'new'},fOpen:false,items:[],outer:false,outfits:null,msg:'',menu:false,
  gender:['female','male','other'].includes(ls.get('gender'))?ls.get('gender'):null,
+ age:AGES.includes(ls.get('age'))?ls.get('age'):null,ageOn:ls.get('ageOn')!=='0',
  occ:'casual',must:null,mood:'',ml:ls.get('ml')==='1',pal:ls.get('pal')==='1',bg:ls.get('bg')==='1',loc:loadLoc(),editLoc:false,q:'',geo:[],geoMsg:'',geoBusy:false,day:0,wxAll:null,wxErr:'',wxT:0};
 let draft=null,panel=null;
 let queue=[],qTotal=0,qIndex=0; // photos picked together are reviewed one after another
@@ -1108,7 +1112,19 @@ function addAcc(main,items,o,must){
   if(c==='bag'||fit([...cur,best])>=fit(cur)-.01){cur.push(best);picked.push(best);if(c!=='bag')extra++}
  }
  return picked}
+/* Age (optional, Profile): children get no high heels, platforms or jewellery; 45+ get a mild nudge away from crop tops, bustiers and minis; 60+ also fewer high heels. */
+const AGE_KID=()=>S.ageOn&&S.age==='u13';
+const KID_NO=i=>(i.cat==='shoes'&&(i.sub==='heels'||i.sub==='platform'))||['necklace','earrings','bracelet','ring','jewelry'].includes(i.cat);
+function ageScore(main){
+ if(!S.ageOn||!S.age)return 0;
+ const old=S.age==='60+',mid=old||S.age==='45-59';let v=0;
+ for(const i of main){
+  if(mid&&['crop','bustier','skirtmini','dressmini'].includes(i.sub))v-=old?1:.6;
+  if(old&&i.cat==='shoes'&&i.sub==='heels')v-=1.5;
+  if(old&&i.cat==='shoes'&&i.sub==='platform')v-=1}
+ return v}
 function suggest(items,o,must){
+ if(AGE_KID())items=items.filter(i=>!KID_NO(i)||(must&&i.id===must.id));
  const by=c=>items.filter(i=>i.cat===c);
  let tops=by('top'),bots=by('bottom'),dr=[...by('dress'),...by('jumpsuit')],outs=o.outer?by('outer'):[],sh=by('shoes');
  const mc=must?must.cat:null;
@@ -1131,7 +1147,7 @@ function suggest(items,o,must){
   xs=swm?(covOnly?[must]:[null,...covers]):solo?[null]:(outs.length?outs:[null]);
  for(const x of xs)for(const s of (sh.length?sh:[null])){
   const main=[...b];if(x)main.push(x);if(s)main.push(s);
-  cand.push({main,key:b.map(i=>i.id).join('+'),score:fit(main)+moodScore(b,main,o.mood)+shoeFit(s,o)+Math.random()*.8})}}
+  cand.push({main,key:b.map(i=>i.id).join('+'),score:fit(main)+moodScore(b,main,o.mood)+shoeFit(s,o)+ageScore(main)+Math.random()*.8})}}
  cand.sort((a,b)=>b.score-a.score);
  const pick=[],used=new Set();
  for(const c of cand){if(pick.length>=3)break;if(!used.has(c.key)){used.add(c.key);pick.push(c)}}
@@ -1527,7 +1543,9 @@ function panelHtml(){
  if(panel==='pack')return packHtml();
  if(panel==='profile')return `<h2>👤 ${T.profile}</h2><div class="lbl">${T.gender}</div><div class="chips">`+
   ['female','male','other'].map(g=>chip(S.gender===g,'setgender',g,T.genders[g])).join('')+
-  `</div><div class="small">${T.genderNote}</div><div class="row"><button class="btn sec" data-act="close">${T.close}</button></div>`;
+  `</div><div class="small">${T.genderNote}</div><div class="lbl">${T.age}</div><div class="chips">`+
+  AGES.map(k=>chip(S.age===k,'setage',k,T.ages[k])).join('')+
+  `</div><div class="chips">${chip(S.ageOn,'toggleage','',T.ageOn)}</div><div class="small">${T.ageNote}</div><div class="row"><button class="btn sec" data-act="close">${T.close}</button></div>`;
  return `<h2>⚙️ ${T.settings}</h2><div class="lbl">${T.lang}</div><div class="chips">`+
   [['el','Ελληνικά'],['en','English']].map(([k,n])=>chip(LANG===k,'setlang',k,n)).join('')+
   `</div><div class="lbl">${T.theme}</div><div class="chips">`+
@@ -1757,6 +1775,8 @@ document.addEventListener('click',async e=>{
  else if(a==='settheme'){THEME=v;ls.set('theme',v);render()}
  else if(a==='setskin'){SKIN=v;ls.set('skin',v);render()}
  else if(a==='setgender'){S.gender=v;ls.set('gender',v);render()}
+ else if(a==='setage'){S.age=S.age===v?null:v;if(S.age)ls.set('age',v);else ls.del('age');render()}
+ else if(a==='toggleage'){S.ageOn=!S.ageOn;ls.set('ageOn',S.ageOn?'1':'0');render()}
  else if(a==='tab'){S.tab=v;render();
   if(v==='suggest'&&S.loc&&(!S.wxAll||Date.now()-S.wxT>36e5)){await loadWx();render()}}
  else if(a==='nav'){if(own(NAV,v)){S.nav=v;S.subF='';render();window.scrollTo(0,0)}}
