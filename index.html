@@ -191,6 +191,8 @@ where:'Τοποθεσία (για τον καιρό)',cityPh:'Πόλη, π.χ. �
 today:'Σήμερα',tomorrow:'Αύριο',retry:'Δοκίμασε ξανά',
 wxFail:'Δεν μπόρεσα να φέρω στοιχεία. Έλεγξε τη σύνδεση.',noCity:'Δεν βρέθηκε πόλη.',
 wxLine:w=>`${w.tmin}–${w.tmax}°C · βροχή ${w.rain}%`,
+swingL:w=>`🌡️ Πρωί ~${w.am}°C, μεσημέρι ~${w.pm}°C: προτείνω κάτι που βγαίνει εύκολα (ζακέτα, overshirt, σακάκι).`,
+picB:'🖼️ Εικόνα',picDate:'Συνδυασμός',
 autoOuter:o=>`Εξωτερικό: ${o?'ναι':'όχι'} (αυτόματα από τον καιρό)`,
 noSeason:'Δεν έχεις αρκετά κομμάτια για αυτή την εποχή, οπότε δεν εφαρμόστηκε φίλτρο εποχής.',nearOcc:'Δεν έχεις αρκετά κομμάτια σημειωμένα για αυτή την περίσταση, οπότε πήρα και από παρόμοιες.',
 noOcc:'Δεν έχεις αρκετά κομμάτια για αυτή την περίσταση, οπότε δεν εφαρμόστηκε φίλτρο περίστασης.',
@@ -279,6 +281,8 @@ where:'Location (for the weather)',cityPh:'City, e.g. Athens',searchB:'Search',c
 today:'Today',tomorrow:'Tomorrow',retry:'Try again',
 wxFail:'Could not fetch data. Check your connection.',noCity:'No city found.',
 wxLine:w=>`${w.tmin}–${w.tmax}°C · rain ${w.rain}%`,
+swingL:w=>`🌡️ Morning ~${w.am}°C, midday ~${w.pm}°C: I suggest a layer that comes off easily (cardigan, overshirt, blazer).`,
+picB:'🖼️ Image',picDate:'Outfit',
 autoOuter:o=>`Outerwear: ${o?'yes':'no'} (automatic from the weather)`,
 noSeason:'You do not have enough items for this season, so the season filter was not applied.',nearOcc:'You do not have enough items tagged for this occasion, so I also used similar ones.',
 noOcc:'You do not have enough items for this occasion, so the occasion filter was not applied.',
@@ -623,14 +627,17 @@ async function loadWx(){
  S.wxAll=null;S.wxErr='';
  if(!S.loc)return;
  try{
-  const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+S.loc.lat+'&longitude='+S.loc.lon+'&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&timezone=auto&forecast_days=2');
+  const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+S.loc.lat+'&longitude='+S.loc.lon+'&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&hourly=temperature_2m&timezone=auto&forecast_days=2');
   if(!r.ok)throw new Error('wx');
-  const d=(await r.json()).daily;
+  const jj=await r.json(),d=jj.daily,hr=(jj.hourly&&Array.isArray(jj.hourly.temperature_2m))?jj.hourly.temperature_2m:[];
   const num=v=>typeof v==='number'&&Number.isFinite(v);
   const pr=d.precipitation_probability_max||[];
   // a missing temperature must fail, not silently become 0 °C; a missing rain probability just means 0
   if(![0,1].every(k=>num(d.temperature_2m_max[k])&&num(d.temperature_2m_min[k])&&(pr[k]==null||num(pr[k]))))throw new Error('wx');
-  S.wxAll=[0,1].map(k=>({tmax:Math.round(d.temperature_2m_max[k]),tmin:Math.round(d.temperature_2m_min[k]),rain:pr[k]==null?0:Math.round(pr[k])}));
+  // within the day: coolest of 7-10 h vs warmest of 12-17 h; a big swing asks for a layer that comes off easily
+  const span=(k,a,b,f)=>{const v=hr.slice(k*24+a,k*24+b+1).filter(num);return v.length?Math.round(f(...v)):null};
+  S.wxAll=[0,1].map(k=>{const w={tmax:Math.round(d.temperature_2m_max[k]),tmin:Math.round(d.temperature_2m_min[k]),rain:pr[k]==null?0:Math.round(pr[k])};
+   const am=span(k,7,10,Math.min),pm=span(k,12,17,Math.max);if(am!=null&&pm!=null){w.am=am;w.pm=pm;w.swing=pm-am>=8&&am<20}return w});
   S.wxT=Date.now();
  }catch(e){S.wxAll=null;S.wxErr=T.wxFail}}
 // Device location: the browser asks for permission. Coordinates are rounded to ~1 km, which is enough for a forecast.
@@ -649,7 +656,7 @@ function useMyLoc(){
 function wxOpts(w,manual){
  if(!w)return {outer:!!manual,cold:!!manual,tightsOk:true,noSun:false};
  const rain=w.rain||0;
- return {outer:w.tmin<12||w.tmax<19||rain>=60,cold:w.tmax<12,tightsOk:w.tmax<18,noSun:rain>=60}}
+ return {outer:w.tmin<12||w.tmax<19||rain>=60||!!w.swing,cold:w.tmax<12,tightsOk:w.tmax<18,noSun:rain>=60,layer:!!w.swing&&w.tmax>=15}}
 /* Which seasons a day counts as. With a forecast the temperature decides; without one the calendar does
    (the first and last month of a season also count as the neighbouring season; southern hemisphere from the saved location). */
 function daySeasons(w,off){
@@ -1103,6 +1110,25 @@ function wornPenalty(list){let p=0;
  for(const i of list){const w=lastWorn(i);if(!w)continue;const d=daysAgo(w);if(d<=0)p-=2;else if(d===1)p-=1.2;else if(d===2)p-=.5}
  return p}
 const fit=list=>cs(list)+patScore(list)+wornPenalty(list)+rateScore(list);
+/* Outfit image: the pieces of a combination on one picture (PNG), shared through the phone's share sheet when possible, otherwise downloaded. */
+async function outfitPic(list){
+ const n=list.length,cols=n<=4?2:3,W=1080,cell=W/cols,lab=56,rows=Math.ceil(n/cols),head=110,H=head+rows*(cell+lab)+30;
+ const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d'),cs=getComputedStyle(document.documentElement);
+ const bg=cs.getPropertyValue('--bg').trim()||'#fff',ink=cs.getPropertyValue('--ink').trim()||'#222',mut=cs.getPropertyValue('--mut').trim()||'#777',card=cs.getPropertyValue('--card').trim()||'#fff';
+ g.fillStyle=bg;g.fillRect(0,0,W,H);g.fillStyle=ink;g.font='600 44px system-ui,sans-serif';g.textAlign='center';g.fillText(T.picDate+' · '+fmtDate(today()),W/2,72);
+ const load=src=>new Promise(r=>{const im=new Image();im.onload=()=>r(im);im.onerror=()=>r(null);im.src=src});
+ for(let k=0;k<n;k++){const i=list[k],x=(k%cols)*cell,y=head+Math.floor(k/cols)*(cell+lab),p=18;
+  g.fillStyle=card;g.beginPath();g.roundRect?g.roundRect(x+p,y+p,cell-2*p,cell-2*p,28):g.rect(x+p,y+p,cell-2*p,cell-2*p);g.fill();
+  const im=i.img?await load(i.img):null;
+  if(im){const s=Math.min((cell-2*p-24)/im.width,(cell-2*p-24)/im.height),w=im.width*s,h=im.height*s;g.drawImage(im,x+(cell-w)/2,y+(cell-h)/2,w,h)}
+  else{g.fillStyle=P[i.color][0];g.fillRect(x+p+12,y+p+12,cell-2*p-24,cell-2*p-24);g.font=Math.round(cell/3)+'px sans-serif';g.fillText(EMOJI[i.cat]||'',x+cell/2,y+cell/2+cell/9)}
+  g.fillStyle=ink;g.font='500 30px system-ui,sans-serif';g.fillText(strip(kind(i)),x+cell/2,y+cell+8);
+  g.fillStyle=mut;g.font='26px system-ui,sans-serif';g.fillText(cname(i.color),x+cell/2,y+cell+42)}
+ g.fillStyle=mut;g.font='22px system-ui,sans-serif';g.textAlign='right';g.fillText('Closet Assistant',W-24,H-12);
+ const blob=await new Promise(r=>c.toBlob(r,'image/png'));if(!blob)return;
+ const name='outfit-'+today()+'.png',file=new File([blob],name,{type:'image/png'});
+ try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return}}catch(e){if(e&&e.name==='AbortError')return}
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
 function reasonOf(list){
  const ids=chromaIds(list);
  if(list.filter(busy).length===1)return 'patMix';
@@ -1110,6 +1136,9 @@ function reasonOf(list){
  if(ids.length===1)return 'oneColor';
  if(ids.length===2){const d=hueDiff(P[ids[0]][1],P[ids[1]][1]);if(d<=30)return 'analog';if(d>=150)return 'compl'}
  return 'mix'}
+// A warm afternoon after a cool morning: a light layer that comes off easily beats a heavy coat.
+const LAYER_LIGHT=['cardigan','overshirt','blazer','jacket','vest','fleece','kimono','trench'],LAYER_HEAVY=['puffer','puffercoat','coat','parka','fur'];
+function layerFit(x,o){if(!x||!o.layer||x.cat!=='outer')return 0;return LAYER_LIGHT.includes(x.sub)?1.5:LAYER_HEAVY.includes(x.sub)?-1.5:0}
 // How well a pair of shoes suits the occasion and the weather (shoes without a sub-type stay neutral).
 const SHOE_OCC={casual:{sneakers:.6,athletic:.2,flats:.4,loafers:.4,ankle:.3,boots:.2,platform:.2,sandals:.3,heels:-.3},
  home:{sneakers:.3,flats:.3,sandals:.3,heels:-1,platform:-.6,boots:-.4},
@@ -1189,7 +1218,7 @@ function suggest(items,o,must){
   xs=swm?(covOnly?[must]:[null,...covers]):solo?[null]:(outs.length?outs:[null]);
  for(const x of xs)for(const s of (sh.length?sh:[null])){
   const main=[...b];if(x)main.push(x);if(s)main.push(s);
-  cand.push({main,key:b.map(i=>i.id).join('+'),score:fit(main)+moodScore(b,main,o.mood)+shoeFit(s,o)+ageScore(main)+Math.random()*.8})}}
+  cand.push({main,key:b.map(i=>i.id).join('+'),score:fit(main)+moodScore(b,main,o.mood)+shoeFit(s,o)+layerFit(x,o)+ageScore(main)+Math.random()*.8})}}
  cand.sort((a,b)=>b.score-a.score);
  const pick=[],used=new Set();
  for(const c of cand){if(pick.length>=3)break;if(!used.has(c.key)){used.add(c.key);pick.push(c)}}
@@ -1529,7 +1558,7 @@ function suggestView(){
  if(S.loc&&!S.editLoc){
   h+=`<div class="det"><span>📍</span><b>${esc(S.loc.mine?T.myLoc:S.loc.name)}</b></div>`;
   h+=`<div class="chips" style="padding:0 0 8px">`+[0,1].map(d=>`<button class="chip ${S.day===d?'on':''}" data-act="day" data-v="${d}">${d?T.tomorrow:T.today}</button>`).join('')+`</div>`;
-  if(w)h+=`<div style="margin-bottom:6px">${T.wxLine(w)}<br><span class="small">${T.autoOuter(wxOpts(w).outer)}</span></div>`;
+  if(w)h+=`<div style="margin-bottom:6px">${T.wxLine(w)}<br><span class="small">${T.autoOuter(wxOpts(w).outer)}</span>${w.swing?`<br><span class="small">${T.swingL(w)}</span>`:''}</div>`;
   else if(S.wxErr)h+=`<div class="small" style="margin-bottom:6px">${S.wxErr}</div>`;
   else h+=`<div class="small" style="margin-bottom:6px">…</div>`;
   h+=`<div class="row"><button class="btn sec" data-act="chloc">${T.change}</button>`+(S.wxErr?`<button class="btn sec" data-act="retry">${T.retry}</button>`:'')+`<button class="btn sec" data-act="noloc">${T.noLoc}</button></div>`;
@@ -1548,12 +1577,12 @@ function suggestView(){
  if(S.msg)h+=`<div class="pad" style="color:var(--mut)">${S.msg}</div>`;
  if(S.outfits)h+=S.outfits.map((o,k)=>`<div class="outfit"><small>${T.reasons[o.reason]}</small><div class="pieces">`+
   [...o.main,...o.acc].map(i=>`<div class="piece">${tile(i)}${strip(kind(i))}<span>${cname(i.color)}${busy(i)?' · '+T.pats[patOf(i)]:''}</span></div>`).join('')+`</div>
-  <div class="row" style="margin-top:8px"><button class="btn sec" data-act="wore" data-v="${k}">${T.woreIt}</button><button class="btn sec" data-act="favsave" data-v="${k}">${isFav([...o.main,...o.acc])?'♥':'♡'} ${T.favSave}</button></div>
+  <div class="row" style="margin-top:8px"><button class="btn sec" data-act="wore" data-v="${k}">${T.woreIt}</button><button class="btn sec" data-act="favsave" data-v="${k}">${isFav([...o.main,...o.acc])?'♥':'♡'} ${T.favSave}</button></div><div class="row" style="margin-top:8px"><button class="btn sec" data-act="pic" data-v="${k}">${T.picB}</button></div>
   <div class="chips" style="padding:8px 0 0"><button class="chip ${rateOf([...o.main,...o.acc])===1?'on':''}" data-act="rate" data-v="${k}" data-r="1" aria-label="👍">👍</button><button class="chip ${rateOf([...o.main,...o.acc])===-1?'on':''}" data-act="rate" data-v="${k}" data-r="-1" aria-label="👎">👎</button><button class="chip" data-act="planopen" data-v="o${k}">${T.planBtn}</button></div></div>`).join('')+(S.outfits.length?`<div class="pad small">${T.rateHint}</div>`:'');
  const fl=FAV.map((f,idx)=>({idx,items:f.ids.map(id=>S.items.find(i=>i.id===id)).filter(Boolean),n:f.ids.length})).filter(x=>x.items.length===x.n);
  if(fl.length)h+=`<div class="pad"><div class="lbl">${T.favTitle}</div></div>`+fl.map(x=>`<div class="outfit"><div class="pieces">`+
   x.items.map(i=>`<div class="piece">${tile(i)}${strip(kind(i))}<span>${cname(i.color)}</span></div>`).join('')+`</div>
-  <div class="row" style="margin-top:8px"><button class="btn sec" data-act="wofav" data-v="${x.idx}">${T.woreIt}</button><button class="btn sec" data-act="favdel" data-v="${x.idx}">${T.favDel}</button><button class="btn sec" data-act="planopen" data-v="f${x.idx}">${T.planBtn}</button></div></div>`).join('');
+  <div class="row" style="margin-top:8px"><button class="btn sec" data-act="wofav" data-v="${x.idx}">${T.woreIt}</button><button class="btn sec" data-act="favdel" data-v="${x.idx}">${T.favDel}</button><button class="btn sec" data-act="planopen" data-v="f${x.idx}">${T.planBtn}</button><button class="btn sec" data-act="pic" data-v="f${x.idx}">${T.picB}</button></div></div>`).join('');
  h+=`<div class="gobar"><button class="btn" data-act="go">${S.outfits?T.again:T.go}</button></div>`;
  return h}
 function render(){
@@ -1906,6 +1935,7 @@ document.addEventListener('click',async e=>{
  else if(a==='wore'||a==='wofav'){
   const list=a==='wore'?(S.outfits&&S.outfits[+v]?[...S.outfits[+v].main,...S.outfits[+v].acc]:[]):((FAV[+v]||{ids:[]}).ids.map(id=>S.items.find(i=>i.id===id)).filter(Boolean));
   if(list.length){await wearOutfit(list);S.msg=T.woreOk;render()}}
+ else if(a==='pic'){const list=v[0]==='f'?(FAV[+v.slice(1)]||{ids:[]}).ids.map(id=>S.items.find(i=>i.id===id)).filter(Boolean):(S.outfits&&S.outfits[+v]?[...S.outfits[+v].main,...S.outfits[+v].acc]:[]);if(list.length)outfitPic(list)}
  else if(a==='favsave'){
   const o=S.outfits&&S.outfits[+v];if(o){const list=[...o.main,...o.acc],k=favKey(list);
    if(isFav(list))FAV=FAV.filter(f=>[...f.ids].sort().join('+')!==k);else FAV=cleanFav([...FAV,{ids:list.map(i=>i.id)}]);
