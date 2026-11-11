@@ -1538,6 +1538,7 @@ function panelHtml(){
   <div class="lbl">${T.mlName}</div><div class="chips">${chip(S.ml,'toggleml','',S.ml?T.on:T.off)}</div><div class="small">${T.mlNote}</div>
   <div class="lbl">${T.learnTitle}</div><div class="small">${T.learnNote}</div><div class="small" style="margin-top:6px">${T.learnStats(LEARN.cat.length,LEARN.col.length,LEARN.st.n,LEARN.st.ok)}</div>
   <div class="row"><button class="btn sec" data-act="resetlearn" ${LEARN.cat.length||LEARN.col.length||LEARN.st.n||RATE.length||LEARN.dup.neg.length||LEARN.dup.pairs.length||Object.keys(LEARN.dup.weak).length?'':'disabled'}>${T.learnReset}</button></div>
+  <div class="small" style="margin-top:14px;opacity:.7">Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0)</div>
   <div class="row"><button class="btn sec" data-act="close">${T.close}</button></div>`}
 /* A form section that shows only what is chosen; tapping it opens all the options (open by itself while nothing is chosen, when need=true). */
 function fold(d,k,lbl,picked,need,body){
