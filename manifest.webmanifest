@@ -1,0 +1,17 @@
+{
+  "name": "Closet Assistant",
+  "short_name": "Closet",
+  "description": "Ψηφιακή ντουλάπα και προτάσεις ντυσίματος",
+  "lang": "el",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7f3f9",
+  "theme_color": "#7b4b94",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

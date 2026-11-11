@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#7b4b94">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Closet">
 <title>Closet Assistant</title>
 <style>
 :root{--bg:#faf7fb;--card:#fff;--ink:#241b2b;--mut:#7a6d84;--acc:#7b4b94;--line:#e8e0ed;--r:16px;color-scheme:light}
@@ -171,6 +177,7 @@ backup:'Αντίγραφο ασφαλείας',exportB:'⬇️ Εξαγωγή',i
 importErr:'Το αρχείο δεν είναι έγκυρο αντίγραφο.',
 confirmImport:n=>`Να προστεθούν ${n} κομμάτια από το αρχείο; Τα υπάρχοντα δεν διαγράφονται.`,
 importOk:n=>`Προστέθηκαν ${n} κομμάτια.`,
+instL:'Εγκατάσταση στην αρχική οθόνη',instB:'📲 Εγκατάσταση',instDone:'Η εφαρμογή είναι εγκατεστημένη.',instHow:'Ανοίγει σαν κανονική εφαρμογή, σε πλήρη οθόνη, και δουλεύει και χωρίς internet (εκτός από καιρό και πρώτη λήψη αναγνώρισης). Ο browser κρατά πιο σίγουρα τα δεδομένα. Android/Chrome: μενού ⋮ → «Εγκατάσταση εφαρμογής» ή «Προσθήκη στην αρχική οθόνη». iPhone/Safari: κουμπί Κοινοποίηση → «Προσθήκη στην οθόνη Αφετηρίας». Τα δεδομένα μένουν τα ίδια.',
 confirmSettings:'Το αντίγραφο περιέχει και ρυθμίσεις (γλώσσα, εμφάνιση, προφίλ, τοποθεσία). Να αντικαταστήσουν τις τωρινές;',
 bkNever:'Δεν έχεις κρατήσει ακόμα αντίγραφο ασφαλείας της ντουλάπας σου.',bkOld:d=>`Το τελευταίο αντίγραφο ασφαλείας είναι πριν από ${d} μέρες.`,bkNow:'Εξαγωγή τώρα',bkLater:'Αργότερα',
 storeL:'Αποθήκευση στη συσκευή',storeOk:'Μόνιμη: ο browser δεν θα σβήσει τα δεδομένα μόνος του.',storeNo:'Όχι μόνιμη: ο browser μπορεί να σβήσει τα δεδομένα αν χρειαστεί χώρο. Η προσθήκη της εφαρμογής στην αρχική οθόνη βοηθά. Κράτα αντίγραφα ασφαλείας.',storeUse:(u,q)=>`Χρήση: ${u} από περίπου ${q} διαθέσιμα.`,lastBk:d=>`Τελευταίο αντίγραφο: ${d}.`,
@@ -258,6 +265,7 @@ backup:'Backup',exportB:'⬇️ Export',importB:'⬆️ Import',
 importErr:'This file is not a valid backup.',
 confirmImport:n=>`Add ${n} items from the file? Existing items are not deleted.`,
 importOk:n=>`Added ${n} items.`,
+instL:'Install on the home screen',instB:'📲 Install',instDone:'The app is installed.',instHow:'It opens like a normal app, full screen, and works offline too (except weather and the first recognition download). The browser keeps the data more reliably. Android/Chrome: menu ⋮ → "Install app" or "Add to Home screen". iPhone/Safari: Share button → "Add to Home Screen". Your data stays the same.',
 confirmSettings:'The backup also contains settings (language, appearance, profile, location). Replace the current ones?',
 bkNever:'You have not kept a backup of your closet yet.',bkOld:d=>`Your last backup is ${d} days old.`,bkNow:'Export now',bkLater:'Later',
 storeL:'Storage on this device',storeOk:'Persistent: the browser will not delete the data on its own.',storeNo:'Not persistent: the browser may delete the data if it needs space. Adding the app to the home screen helps. Keep backups.',storeUse:(u,q)=>`Using ${u} of about ${q} available.`,lastBk:d=>`Last backup: ${d}.`,
@@ -1583,6 +1591,7 @@ function panelHtml(){
   <div class="lbl">${T.mlName}</div><div class="chips">${chip(S.ml,'toggleml','',S.ml?T.on:T.off)}</div><div class="small">${T.mlNote}</div>
   <div class="lbl">${T.learnTitle}</div><div class="small">${T.learnNote}</div><div class="small" style="margin-top:6px">${T.learnStats(LEARN.cat.length,LEARN.col.length,LEARN.st.n,LEARN.st.ok)}</div>
   <div class="row"><button class="btn sec" data-act="resetlearn" ${LEARN.cat.length||LEARN.col.length||LEARN.st.n||RATE.length||LEARN.dup.neg.length||LEARN.dup.pairs.length||Object.keys(LEARN.dup.weak).length?'':'disabled'}>${T.learnReset}</button></div>
+  <div class="lbl">${T.instL}</div>${INSTALLED()?`<div class="small">${T.instDone}</div>`:`${INST?`<div class="row"><button class="btn" data-act="install">${T.instB}</button></div>`:''}<div class="small">${T.instHow}</div>`}
   <div class="lbl">${T.storeL}</div><div class="small">${S.store&&S.store.p?T.storeOk:T.storeNo}${S.store&&S.store.q?' '+T.storeUse(mb(S.store.u),mb(S.store.q)):''}${+ls.get('lastExport')?' '+T.lastBk(esc(fmtDate(new Date(+ls.get('lastExport')).toISOString().slice(0,10)))):''}</div>
   <div class="small" style="margin-top:14px;opacity:.7">Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0)</div>
   <div class="row"><button class="btn sec" data-act="close">${T.close}</button></div>`}
@@ -1798,6 +1807,7 @@ document.addEventListener('click',async e=>{
  else if(a==='packtick'){const pk=S.pack;if(pk&&pk.list&&pk.list.groups.some(g=>g.items.some(i=>i.id===v))){pk.checked[v]=!pk.checked[v];sheet()}}
  else if(a==='packagain'){S.pack.list=null;sheet()}
  else if(a==='export'){S.menu=false;exportData();render()}
+ else if(a==='install'){if(INST){INST.prompt();INST.userChoice.finally(()=>{INST=null;render()})}}
  else if(a==='bklater'){ls.set('bkSnooze',String(Date.now()+7*864e5));render()}
  else if(a==='setlang'){LANG=v;ls.set('lang',v);render()}
  else if(a==='settheme'){THEME=v;ls.set('theme',v);render()}
@@ -1964,6 +1974,12 @@ document.addEventListener('change',async e=>{
  else if(t.matches&&t.matches('[data-outer]')){S.outer=t.checked}
 });
 
+// Home-screen install (PWA): offline copy through sw.js; Chrome/Android offers an install prompt that the Settings button can open.
+let INST=null;
+const INSTALLED=()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(_){return false}};
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();INST=e;if(panel==='settings')render()});
+addEventListener('appinstalled',()=>{INST=null;checkStore(true).then(()=>{if(panel==='settings')render()})});
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
 openDB().then(async()=>{
  checkStore(true);
  await reload();render();
