@@ -171,6 +171,9 @@ backup:'Αντίγραφο ασφαλείας',exportB:'⬇️ Εξαγωγή',i
 importErr:'Το αρχείο δεν είναι έγκυρο αντίγραφο.',
 confirmImport:n=>`Να προστεθούν ${n} κομμάτια από το αρχείο; Τα υπάρχοντα δεν διαγράφονται.`,
 importOk:n=>`Προστέθηκαν ${n} κομμάτια.`,
+confirmSettings:'Το αντίγραφο περιέχει και ρυθμίσεις (γλώσσα, εμφάνιση, προφίλ, τοποθεσία). Να αντικαταστήσουν τις τωρινές;',
+bkNever:'Δεν έχεις κρατήσει ακόμα αντίγραφο ασφαλείας της ντουλάπας σου.',bkOld:d=>`Το τελευταίο αντίγραφο ασφαλείας είναι πριν από ${d} μέρες.`,bkNow:'Εξαγωγή τώρα',bkLater:'Αργότερα',
+storeL:'Αποθήκευση στη συσκευή',storeOk:'Μόνιμη: ο browser δεν θα σβήσει τα δεδομένα μόνος του.',storeNo:'Όχι μόνιμη: ο browser μπορεί να σβήσει τα δεδομένα αν χρειαστεί χώρο. Η προσθήκη της εφαρμογής στην αρχική οθόνη βοηθά. Κράτα αντίγραφα ασφαλείας.',storeUse:(u,q)=>`Χρήση: ${u} από περίπου ${q} διαθέσιμα.`,lastBk:d=>`Τελευταίο αντίγραφο: ${d}.`,
 menu:'Μενού',profile:'Προφίλ',settings:'Ρυθμίσεις',lang:'Γλώσσα',theme:'Εμφάνιση',
 themes:{auto:'Αυτόματο',light:'Φωτεινό',dark:'Σκοτεινό'},skinQ:'Στυλ',skins:{auto:'Αυτόματο (από το φύλο)',a:'Μωβ',b:'Ζεστό / κομψό',c:'Μινιμαλ ασπρόμαυρο'},
 gender:'Φύλο',genders:{female:'Γυναίκα',male:'Άνδρας',other:'Άλλο / δεν θέλω να πω'},
@@ -255,6 +258,9 @@ backup:'Backup',exportB:'⬇️ Export',importB:'⬆️ Import',
 importErr:'This file is not a valid backup.',
 confirmImport:n=>`Add ${n} items from the file? Existing items are not deleted.`,
 importOk:n=>`Added ${n} items.`,
+confirmSettings:'The backup also contains settings (language, appearance, profile, location). Replace the current ones?',
+bkNever:'You have not kept a backup of your closet yet.',bkOld:d=>`Your last backup is ${d} days old.`,bkNow:'Export now',bkLater:'Later',
+storeL:'Storage on this device',storeOk:'Persistent: the browser will not delete the data on its own.',storeNo:'Not persistent: the browser may delete the data if it needs space. Adding the app to the home screen helps. Keep backups.',storeUse:(u,q)=>`Using ${u} of about ${q} available.`,lastBk:d=>`Last backup: ${d}.`,
 menu:'Menu',profile:'Profile',settings:'Settings',lang:'Language',theme:'Appearance',
 themes:{auto:'Automatic',light:'Light',dark:'Dark'},skinQ:'Style',skins:{auto:'Automatic (from gender)',a:'Purple',b:'Warm / elegant',c:'Minimal black & white'},
 gender:'Gender',genders:{female:'Woman',male:'Man',other:'Other / prefer not to say'},
@@ -558,14 +564,36 @@ function cleanItem(o){
  if(typeof o.em==='string'&&EM_RE.test(o.em)&&it.img)it.em=o.em;
  if(Array.isArray(o.ok)){const k=AUDIT_CODES.filter(x=>o.ok.includes(x));if(k.length)it.ok=k}
  return it}
+// Settings that travel with a backup; each value is checked before it is restored.
+const SET_KEYS=['lang','theme','skin','gender','age','ageOn','ml','pal','bg','loc'];
+const SET_OK={lang:v=>own(I18N,v),theme:v=>['auto','light','dark'].includes(v),skin:v=>['auto','a','b','c'].includes(v),gender:v=>['female','male','other'].includes(v),
+ age:v=>AGES.includes(v),ageOn:v=>v==='0'||v==='1',ml:v=>v==='0'||v==='1',pal:v=>v==='0'||v==='1',bg:v=>v==='0'||v==='1',
+ loc:v=>{try{const o=JSON.parse(v);return !!o&&typeof o.name==='string'&&o.name.length<200&&Number.isFinite(o.lat)&&Number.isFinite(o.lon)}catch(_){return false}}};
+function cleanSettings(o){const r={};if(o&&typeof o==='object')for(const k of SET_KEYS)if(typeof o[k]==='string'&&SET_OK[k](o[k]))r[k]=o[k];return r}
+// Storage: ask the browser to keep the data (it may refuse), and show how much space is used.
+async function checkStore(ask){
+ const st=navigator.storage;if(!st)return;
+ try{let p=st.persisted?await st.persisted():false;if(!p&&ask&&st.persist)p=await st.persist();S.store={...(S.store||{}),p}}catch(_){}
+ try{if(st.estimate){const e=await st.estimate();S.store={...(S.store||{}),u:e.usage||0,q:e.quota||0}}}catch(_){}}
+const mb=n=>n>=1e9?(n/1e9).toFixed(1)+' GB':Math.max(.1,n/1e6).toFixed(1)+' MB';
+// Backup reminder: shown in the closet when nothing was exported for 30 days (counted from the first item if never), snoozed 7 days by "Later".
+function bkDue(){
+ if(!S.items.length)return null;
+ const now=Date.now(),last=+ls.get('lastExport')||0,sn=+ls.get('bkSnooze')||0;
+ if(sn>now)return null;
+ const base=last||Math.min(...S.items.map(i=>i.t||now));
+ const days=Math.floor((now-base)/864e5);
+ return days>=30?{last,days}:null}
 function exportData(){
- const blob=new Blob([JSON.stringify({app:'closet-assistant',v:3,items:S.items,learn:learnOut(),fav:FAV,rate:RATE,plan:PLAN})],{type:'application/json'});
+ const set={};for(const k of SET_KEYS){const v=ls.get(k);if(v!=null)set[k]=v}
+ const blob=new Blob([JSON.stringify({app:'closet-assistant',v:4,items:S.items,learn:learnOut(),fav:FAV,rate:RATE,plan:PLAN,settings:set})],{type:'application/json'});
+ ls.set('lastExport',String(Date.now()));ls.del('bkSnooze');
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
  a.download='closet-backup-'+new Date().toISOString().slice(0,10)+'.json';
  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
 async function importData(file){
- let items,jl=null,jf=[],jr=[],jpl=[];
- try{const j=JSON.parse(await file.text());items=Array.isArray(j)?j:j.items;jl=Array.isArray(j)?null:j.learn;jf=Array.isArray(j)?[]:cleanFav(j.fav);jr=Array.isArray(j)?[]:cleanRate(j.rate);jpl=Array.isArray(j)?[]:cleanPlan(j.plan);if(!Array.isArray(items))throw 0}
+ let items,jl=null,jf=[],jr=[],jpl=[],js={};
+ try{const j=JSON.parse(await file.text());items=Array.isArray(j)?j:j.items;jl=Array.isArray(j)?null:j.learn;jf=Array.isArray(j)?[]:cleanFav(j.fav);jr=Array.isArray(j)?[]:cleanRate(j.rate);jpl=Array.isArray(j)?[]:cleanPlan(j.plan);js=Array.isArray(j)?{}:cleanSettings(j.settings);if(!Array.isArray(items))throw 0}
  catch(_){alert(T.importErr);return}
  const ok=items.map(cleanItem).filter(Boolean);
  if(!ok.length){alert(T.importErr);return}
@@ -574,7 +602,8 @@ async function importData(file){
  try{const lj=cleanLearn(jl);if(lj.cat.length||lj.col.length||lj.dup.neg.length||lj.dup.pairs.length||Object.keys(lj.dup.weak).length){LEARN.cat=[...LEARN.cat,...lj.cat].slice(-LEARN_MAX.cat);LEARN.col=[...LEARN.col,...lj.col].slice(-LEARN_MAX.col);LEARN.dup.neg=[...LEARN.dup.neg,...lj.dup.neg].slice(-50);LEARN.dup.pairs=[...new Set([...LEARN.dup.pairs,...lj.dup.pairs])].slice(-200);for(const k in lj.dup.weak)LEARN.dup.weak[k]=Math.max(LEARN.dup.weak[k]||0,lj.dup.weak[k]);LEARN.st={n:LEARN.st.n+lj.st.n,ok:LEARN.st.ok+lj.st.ok};saveLearn()}}catch(_){}
  try{FAV=cleanFav([...FAV,...jf]);saveFav()}catch(_){}
  try{RATE=cleanRate([...RATE,...jr]);saveRate();PLAN=cleanPlan([...PLAN,...jpl]).filter(p=>p.d>=today());savePlan()}catch(_){}
- await reload();S.outfits=null;render();alert(T.importOk(ok.length))}
+ await reload();S.outfits=null;render();alert(T.importOk(ok.length));
+ if(Object.keys(js).length&&confirm(T.confirmSettings)){for(const k in js)ls.set(k,js[k]);location.reload()}}
 
 /* ---------- weather (Open-Meteo, no key) ---------- */
 async function geoSearch(q){
@@ -1519,6 +1548,7 @@ function render(){
  let h=`<header><button class="menu-btn" data-act="menu" aria-label="${T.menu}">☰</button><h1>${T.title}</h1><span class="sp"></span></header>`;
  if(S.tab==='closet'){
   h+=navHtml();
+  {const b=bkDue();if(b)h+=`<div class="pad"><div class="small" style="border:1px solid var(--line);border-radius:12px;padding:10px 12px">💾 ${b.last?T.bkOld(b.days):T.bkNever}<div class="row" style="margin-top:8px"><button class="btn" data-act="export">${T.bkNow}</button><button class="btn sec" data-act="bklater">${T.bkLater}</button></div></div></div>`}
   {const n=fxCount();h+=`<div class="pad" style="padding-top:0;display:flex;gap:8px"><input id="cs" class="inp" style="flex:1" placeholder="${esc(T.searchPh)}" value="${esc(S.cq||'')}" autocomplete="off"><button class="chip ${S.fOpen||n?'on':''}" data-act="fxopen">⚙ ${T.filtersB}${n?' · '+n:''}</button></div>`}
   if(S.fOpen)h+=fxHtml();
   h+=`<div id="gridwrap">${gridHtml()}</div>`;
@@ -1553,6 +1583,7 @@ function panelHtml(){
   <div class="lbl">${T.mlName}</div><div class="chips">${chip(S.ml,'toggleml','',S.ml?T.on:T.off)}</div><div class="small">${T.mlNote}</div>
   <div class="lbl">${T.learnTitle}</div><div class="small">${T.learnNote}</div><div class="small" style="margin-top:6px">${T.learnStats(LEARN.cat.length,LEARN.col.length,LEARN.st.n,LEARN.st.ok)}</div>
   <div class="row"><button class="btn sec" data-act="resetlearn" ${LEARN.cat.length||LEARN.col.length||LEARN.st.n||RATE.length||LEARN.dup.neg.length||LEARN.dup.pairs.length||Object.keys(LEARN.dup.weak).length?'':'disabled'}>${T.learnReset}</button></div>
+  <div class="lbl">${T.storeL}</div><div class="small">${S.store&&S.store.p?T.storeOk:T.storeNo}${S.store&&S.store.q?' '+T.storeUse(mb(S.store.u),mb(S.store.q)):''}${+ls.get('lastExport')?' '+T.lastBk(esc(fmtDate(new Date(+ls.get('lastExport')).toISOString().slice(0,10)))):''}</div>
   <div class="small" style="margin-top:14px;opacity:.7">Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0)</div>
   <div class="row"><button class="btn sec" data-act="close">${T.close}</button></div>`}
 /* A form section that shows only what is chosen; tapping it opens all the options (open by itself while nothing is chosen, when need=true). */
@@ -1756,7 +1787,7 @@ document.addEventListener('click',async e=>{
  const b=e.target.closest('[data-act]');if(!b)return;
  const a=b.dataset.act,v=b.dataset.v;
  if(a==='menu'){S.menu=!S.menu;const d=$('.dw');if(d)d.classList.toggle('open',S.menu)}
- else if(a==='profile'||a==='settings'){S.menu=false;panel=a;render()}
+ else if(a==='profile'||a==='settings'){S.menu=false;panel=a;render();if(a==='settings')checkStore(false).then(()=>{if(panel==='settings')render()})}
  else if(a==='stats'||a==='pack'){S.menu=false;panel=a;if(a==='pack'&&!S.pack)S.pack=newPack();render()}
  else if(a==='audit'){S.menu=false;panel='audit';draft=null;render();runAudit()}
  else if(a==='afix'||a==='akeep'||a==='askip'||a==='adel'||a==='aopen'||a==='aall'){await auditAct(a,v)}
@@ -1767,6 +1798,7 @@ document.addEventListener('click',async e=>{
  else if(a==='packtick'){const pk=S.pack;if(pk&&pk.list&&pk.list.groups.some(g=>g.items.some(i=>i.id===v))){pk.checked[v]=!pk.checked[v];sheet()}}
  else if(a==='packagain'){S.pack.list=null;sheet()}
  else if(a==='export'){S.menu=false;exportData();render()}
+ else if(a==='bklater'){ls.set('bkSnooze',String(Date.now()+7*864e5));render()}
  else if(a==='setlang'){LANG=v;ls.set('lang',v);render()}
  else if(a==='settheme'){THEME=v;ls.set('theme',v);render()}
  else if(a==='setskin'){SKIN=v;ls.set('skin',v);render()}
@@ -1933,7 +1965,7 @@ document.addEventListener('change',async e=>{
 });
 
 openDB().then(async()=>{
- try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(_){}
+ checkStore(true);
  await reload();render();
  if(S.loc){await loadWx();render()}
 });
