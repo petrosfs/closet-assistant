@@ -1224,9 +1224,6 @@ function statsHtml(){
  if(st.stale.length)h+=`<div class="lbl">${T.stStale}</div>`+mini(st.stale);
  h+=`<div class="lbl">${T.stCat}</div>`+barRows(sortCount(st.byCat),Math.max(...Object.values(st.byCat)),k=>T.cats[k]||k);
  h+=`<div class="lbl">${T.stCol}</div>`+barRows(sortCount(st.byCol).slice(0,8),Math.max(...Object.values(st.byCol)),k=>cname(k));
- if(st.priced){
-  h+=`<div class="lbl">${T.stCost}</div><div class="small">${T.stSpent(st.priced,money(st.spent))}${st.unworn>0?' '+T.stUnwornValue(money(st.unworn)):''}</div>`;
-  if(st.cpw.length){h+=`<div class="small" style="margin-bottom:4px">${T.stCostNote}</div>`+st.cpw.slice(0,8).map(x=>`<div class="statrow"><div style="width:44px;flex:none">${tile(x.i)}</div><b style="flex:1">${strip(kind(x.i))} · ${esc(cname(x.i.color))}</b><span>${money(x.v)}</span></div>`).join('')}}
  return h+`<div class="row"><button class="btn sec" data-act="close">${T.close}</button></div>`}
 
 /* ---------- packing list ---------- */
@@ -1650,10 +1647,9 @@ function draftHtml(){
   h+=fold(d,'ssn',T.seasonQ+st('ssn'),!sn.length||sn.length===4?[T.ssns.all]:sn.map(k=>T.ssns[k]),false,chip(!sn.length||sn.length===4,'ssn','all',T.ssns.all)+SSN.map(k=>chip(sn.length<4&&sn.includes(k),'ssn',k,T.ssns[k])).join(''));
   // 4. optional details open on demand
   h+=`<div class="lbl">${T.optQ}</div>`;
-  {const ob=d.openBrand||d.brand,op=d.openPrice||d.price;
-   if(!ob||!op)h+=`<div class="chips">${ob?'':chip(false,'openbrand','',T.addBrand)}${op?'':chip(false,'openprice','',T.addPrice)}</div>`;
-   if(ob)h+=`<div class="lbl">${T.brandQ}</div><input id="brand" class="inp" style="width:100%" maxlength="40" value="${esc(d.brand||'')}" autocomplete="off">`;
-   if(op)h+=`<div class="lbl">${T.priceQ}</div><input id="price" class="inp" style="width:100%" inputmode="decimal" maxlength="9" value="${d.price?esc(String(d.price)):''}" autocomplete="off">`}
+  {const ob=d.openBrand||d.brand;
+   if(!ob)h+=`<div class="chips">${chip(false,'openbrand','',T.addBrand)}</div>`;
+   else h+=`<div class="lbl">${T.brandQ}</div><input id="brand" class="inp" style="width:100%" maxlength="40" value="${esc(d.brand||'')}" autocomplete="off">`}
   if(d.id)h+=`<div class="row"><label class="btn sec">${d.img?T.changePhoto:T.addPhoto}<input type="file" accept="image/*" data-in2 hidden></label></div>`;
   const more=!d.id&&qTotal<=1?`<button class="btn sec" data-act="savemore" ${d.color&&d.cat?'':'disabled'}>${T.saveMore}</button>`:'';
   h+=`<div class="row"><button class="btn" data-act="save" ${d.color&&d.cat?'':'disabled'}>${T.save}</button>${more}</div>
@@ -1671,8 +1667,8 @@ function viewHtml(d){
  h+=`<div class="sel" style="margin:8px 0 6px">`+cl.map(c=>`<span class="selc"><i style="background:${P[c][0]}"></i>${esc(cname(c))}</span>`).join('')+`</div>`;
  const kv=(k,v)=>v?`<div class="kv"><b>${k}</b><span>${v}</span></div>`:'';
  h+=kv(T.fPat,busy(d)?T.pats[patOf(d)]:'')+kv(strip(T.matQ.replace(/\s*\(.*\)/,'')),d.mat?T.mats[d.mat]:'')+kv(T.fOcc,occ.map(o=>T.occs[o]).join(', '))+kv(T.fSeason,sn.length&&sn.length<4?sn.map(x=>strip(T.ssns[x])).join(', '):T.ssns.all)+
-  kv(T.brandL,d.brand?esc(d.brand):'')+kv(T.priceL,d.price?money(d.price):'');
- h+=`<div class="small" style="margin:10px 0 2px">${n?T.wornN(n,esc(fmtDate(lastWorn(d)))):T.wornNever}${d.price&&n?' · '+T.costPer(money(d.price/n)):''}</div>`;
+  kv(T.brandL,d.brand?esc(d.brand):'');
+ h+=`<div class="small" style="margin:10px 0 2px">${n?T.wornN(n,esc(fmtDate(lastWorn(d)))):T.wornNever}</div>`;
  h+=`<div class="row"><button class="btn" data-act="wantwear">${T.wantWear}</button></div>
  <div class="row"><button class="btn sec" data-act="wearitem">${T.woreIt}</button><button class="btn sec" data-act="editview">${T.editB}</button></div>
  <div class="row"><button class="btn sec" data-act="close">${T.close}</button></div>`;
