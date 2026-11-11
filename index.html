@@ -175,8 +175,8 @@ note:'Τα δεδομένα αποθηκεύονται μόνο σε αυτή τ
 coldHint:'Κασκόλ και γάντια προτείνονται μόνο όταν αυτό είναι τικαρισμένο.',
 backup:'Αντίγραφο ασφαλείας',exportB:'⬇️ Εξαγωγή',importB:'⬆️ Εισαγωγή',
 importErr:'Το αρχείο δεν είναι έγκυρο αντίγραφο.',
-confirmImport:n=>`Να προστεθούν ${n} κομμάτια από το αρχείο; Τα υπάρχοντα δεν διαγράφονται.`,
-importOk:n=>`Προστέθηκαν ${n} κομμάτια.`,
+confirmImport:(n,m)=>`Να προστεθούν ${n} νέα κομμάτια από το αρχείο;`+(m?` ${m} υπάρχουν ήδη: μένουν όπως είναι τώρα (προστίθενται μόνο οι μέρες που φορέθηκαν).`:'')+` Τα υπάρχοντα δεν διαγράφονται.`,
+importOk:(n,m)=>`Προστέθηκαν ${n} νέα κομμάτια.`+(m?` ${m} υπήρχαν ήδη.`:''),
 instL:'Εγκατάσταση στην αρχική οθόνη',instB:'📲 Εγκατάσταση',instDone:'Η εφαρμογή είναι εγκατεστημένη.',instHow:'Ανοίγει σαν κανονική εφαρμογή, σε πλήρη οθόνη, και δουλεύει και χωρίς internet (εκτός από καιρό και πρώτη λήψη αναγνώρισης). Ο browser κρατά πιο σίγουρα τα δεδομένα. Android/Chrome: μενού ⋮ → «Εγκατάσταση εφαρμογής» ή «Προσθήκη στην αρχική οθόνη». iPhone/Safari: κουμπί Κοινοποίηση → «Προσθήκη στην οθόνη Αφετηρίας». Τα δεδομένα μένουν τα ίδια.',
 confirmSettings:'Το αντίγραφο περιέχει και ρυθμίσεις (γλώσσα, εμφάνιση, προφίλ, τοποθεσία). Να αντικαταστήσουν τις τωρινές;',
 bkNever:'Δεν έχεις κρατήσει ακόμα αντίγραφο ασφαλείας της ντουλάπας σου.',bkOld:d=>`Το τελευταίο αντίγραφο ασφαλείας είναι πριν από ${d} μέρες.`,bkNow:'Εξαγωγή τώρα',bkLater:'Αργότερα',
@@ -265,8 +265,8 @@ note:'Data is stored on this device only. Clearing browser data erases it. Expor
 coldHint:'Winter scarves and gloves are only suggested when this is ticked.',
 backup:'Backup',exportB:'⬇️ Export',importB:'⬆️ Import',
 importErr:'This file is not a valid backup.',
-confirmImport:n=>`Add ${n} items from the file? Existing items are not deleted.`,
-importOk:n=>`Added ${n} items.`,
+confirmImport:(n,m)=>`Add ${n} new items from the file?`+(m?` ${m} are already here: they stay as they are now (only the days they were worn are added).`:'')+` Existing items are not deleted.`,
+importOk:(n,m)=>`Added ${n} new items.`+(m?` ${m} were already here.`:''),
 instL:'Install on the home screen',instB:'📲 Install',instDone:'The app is installed.',instHow:'It opens like a normal app, full screen, and works offline too (except weather and the first recognition download). The browser keeps the data more reliably. Android/Chrome: menu ⋮ → "Install app" or "Add to Home screen". iPhone/Safari: Share button → "Add to Home Screen". Your data stays the same.',
 confirmSettings:'The backup also contains settings (language, appearance, profile, location). Replace the current ones?',
 bkNever:'You have not kept a backup of your closet yet.',bkOld:d=>`Your last backup is ${d} days old.`,bkNow:'Export now',bkLater:'Later',
@@ -609,12 +609,17 @@ async function importData(file){
  catch(_){alert(T.importErr);return}
  const ok=items.map(cleanItem).filter(Boolean);
  if(!ok.length){alert(T.importErr);return}
- if(!confirm(T.confirmImport(ok.length)))return;
- for(const it of ok)await dbPut(it);
- try{const lj=cleanLearn(jl);if(lj.cat.length||lj.col.length||lj.dup.neg.length||lj.dup.pairs.length||Object.keys(lj.dup.weak).length){LEARN.cat=[...LEARN.cat,...lj.cat].slice(-LEARN_MAX.cat);LEARN.col=[...LEARN.col,...lj.col].slice(-LEARN_MAX.col);LEARN.dup.neg=[...LEARN.dup.neg,...lj.dup.neg].slice(-50);LEARN.dup.pairs=[...new Set([...LEARN.dup.pairs,...lj.dup.pairs])].slice(-200);for(const k in lj.dup.weak)LEARN.dup.weak[k]=Math.max(LEARN.dup.weak[k]||0,lj.dup.weak[k]);LEARN.st={n:LEARN.st.n+lj.st.n,ok:LEARN.st.ok+lj.st.ok};saveLearn()}}catch(_){}
+ // an item already on this device keeps its current version (an older backup must not undo later edits); only worn days are merged
+ const cur=new Map((await dbAll()).map(i=>[i.id,i])),fresh=ok.filter(i=>!cur.has(i.id)),old=ok.filter(i=>cur.has(i.id));
+ if(!confirm(T.confirmImport(fresh.length,old.length)))return;
+ for(const it of fresh)await dbPut(it);
+ for(const it of old){const o=cur.get(it.id),w=[...new Set([...(o.w||[]),...(it.w||[])])].sort().slice(-400);if(w.length>(o.w||[]).length)await dbPut({...o,w})}
+ try{const lj=cleanLearn(jl);if(lj.cat.length||lj.col.length||lj.dup.neg.length||lj.dup.pairs.length||Object.keys(lj.dup.weak).length){// importing the same backup twice must not double the remembered examples
+  const ky=x=>JSON.stringify(x&&x.e?{...x,e:Array.from(x.e)}:x),nw=(a,b)=>{const k=new Set(a.map(ky));return b.filter(x=>!k.has(ky(x)))},nc=nw(LEARN.cat,lj.cat);
+  LEARN.cat=[...LEARN.cat,...nc].slice(-LEARN_MAX.cat);LEARN.col=[...LEARN.col,...nw(LEARN.col,lj.col)].slice(-LEARN_MAX.col);LEARN.dup.neg=[...LEARN.dup.neg,...nw(LEARN.dup.neg,lj.dup.neg)].slice(-50);LEARN.dup.pairs=[...new Set([...LEARN.dup.pairs,...lj.dup.pairs])].slice(-200);for(const k in lj.dup.weak)LEARN.dup.weak[k]=Math.max(LEARN.dup.weak[k]||0,lj.dup.weak[k]);if(nc.length)LEARN.st={n:LEARN.st.n+lj.st.n,ok:LEARN.st.ok+lj.st.ok};saveLearn()}}catch(_){}
  try{FAV=cleanFav([...FAV,...jf]);saveFav()}catch(_){}
  try{RATE=cleanRate([...RATE,...jr]);saveRate();PLAN=cleanPlan([...PLAN,...jpl]).filter(p=>p.d>=today());savePlan()}catch(_){}
- await reload();S.outfits=null;render();alert(T.importOk(ok.length));
+ await reload();S.outfits=null;render();alert(T.importOk(fresh.length,old.length));
  if(Object.keys(js).length&&confirm(T.confirmSettings)){for(const k in js)ls.set(k,js[k]);location.reload()}}
 
 /* ---------- weather (Open-Meteo, no key) ---------- */
@@ -874,6 +879,7 @@ async function embedImg(dataUrl){
    col: [{l:[L,a,b], c:colour}]   st: guess statistics   dup: what "not the same" taught the duplicate check */
 const LEARN_MAX={cat:400,col:200};
 const SIM_MIN=0.85; // a remembered item only counts when it looks this similar
+const ATTR_MIN=0.93; // look-alike votes on pattern/fabric: 0.85-0.9 is just a similar cut on the same mannequin
 function cleanLearn(o){
  const L={cat:[],col:[],st:{n:0,ok:0},dup:{neg:[],pairs:[],weak:{}}};
  if(!o||typeof o!=='object')return L;
@@ -908,7 +914,7 @@ const q8=v=>Array.from(v,x=>Math.max(-127,Math.min(127,Math.round(x*127))));
 const dq8=e=>l2(e.map(x=>x/127));
 /* Starting examples: the 20 sample photos (category, sub-type and, where it applies, pattern and fabric), shipped with the app so
    recognition starts a little better. They are not part of the learning memory, not exported, and not erased by "Erase what I learned". */
-const SEEDS=MODEL.seeds.map(x=>{try{const e=Array.from(b64i8(x.e));return e.length===512&&own(I18N.el.cats,x.c)?{e,c:x.c,s:subOk(x.c,x.s)?x.s:undefined,p:x.p,m:x.m}:null}catch(_){return null}}).filter(Boolean);
+const SEEDS=MODEL.seeds.map(x=>{try{const e=Array.from(b64i8(x.e));return e.length===512&&own(I18N.el.cats,x.c)?{e,c:x.c,s:subOk(x.c,x.s)?x.s:undefined,p:x.p||'solid',m:x.m}:null}catch(_){return null}}).filter(Boolean);
 // Colour-naming examples shipped with the app: [L,a,b] -> basic colour, learned from labelled photos.
 const COLSEED=(()=>{try{const u=b64bytes(MODEL.col),o=[];for(let i=0;i+3<u.length;i+=4)if(BASE[u[i+3]])o.push({l:[u[i]/2.55,u[i+1]-128,u[i+2]-128],c:BASE[u[i+3]]});return o}catch(_){return []}})();
 // Remembers a saved item: how it looks and everything the user confirmed about it.
@@ -989,10 +995,12 @@ function mlAttrs(emb,cat,sub,nb){
   if(pk('sport')>=MODEL.occthr.sport)add.push('sport');if(pk('formal')>=MODEL.occthr.formal)add.push('smart');
   if(add.length)o.occAdd=add}
  // look-alikes among remembered items
- const vote=(get)=>{const v=(nb||[]).filter(x=>x.c===cat&&get(x)!==undefined);if(!v.length)return null;
+ // min: lowest similarity allowed; pattern and fabric belong to the piece itself, so only near-identical photos vote on them.
+ // Only the same sub-type votes (a knit sweater must not take a tank top's summer/beach just because the cut looks alike).
+ const vote=(get,min=SIM_MIN)=>{const v=(nb||[]).filter(x=>x.c===cat&&x.s>=min&&(!sub||!x.sub||x.sub===sub)&&get(x)!==undefined);if(!v.length)return null;
   const w=v.map(x=>(x.s-SIM_MIN)/(1-SIM_MIN)+0.1),W=w.reduce((a,b)=>a+b,0),V={};v.forEach((x,i)=>{for(const k of [].concat(get(x)))V[k]=(V[k]||0)+w[i]/W});return V};
- const vp=vote(x=>x.p);if(vp){const k=topKey(vp);if(vp[k]>=0.6)o.pat=k}
- const vm=vote(x=>x.m);if(vm){const k=topKey(vm);if(vm[k]>=0.6)o.mat=k}
+ const vp=vote(x=>x.p,ATTR_MIN);if(vp){const k=topKey(vp);if(vp[k]>=0.6)o.pat=k}
+ const vm=vote(x=>x.m||'',ATTR_MIN);if(vm){const k=topKey(vm);if(vm[k]>=0.6)o.mat=k}
  const vo=vote(x=>x.o);if(vo){const k=OCC.filter(x=>vo[x]>=0.5);if(k.length)o.occ=k}
  const vn=vote(x=>x.n);if(vn){const k=SSN.filter(x=>vn[x]>=0.5);if(k.length)o.ssn=k}
  return o}
